@@ -114,6 +114,7 @@ const TableList: React.FC = () => {
       dataIndex: 'name',
       tip: 'The rule name is the unique key',
       render: (dom, entity) => {
+        console.log('[name]----', dom, entity);
         return (
           <a
             onClick={() => {
@@ -139,13 +140,17 @@ const TableList: React.FC = () => {
         />
       ),
       dataIndex: 'callNo',
-      sorter: true,
+      sorter: true, //todo： 排序传参
       hideInForm: true,
-      renderText: (val: string) =>
-        `${val}${intl.formatMessage({
+      renderText: (val: string, record, index) => {
+        console.log('[callNo]-----', val, record, index);
+
+        let text = `${val}${intl.formatMessage({
           id: 'pages.searchTable.tenThousand',
           defaultMessage: ' 万 ',
-        })}`,
+        })}`;
+        return text;
+      },
     },
     {
       title: <FormattedMessage id="pages.searchTable.titleStatus" defaultMessage="Status" />,
@@ -194,22 +199,15 @@ const TableList: React.FC = () => {
       sorter: true,
       dataIndex: 'updatedAt',
       valueType: 'dateTime',
+      // todo  renderFormItem(defaultRender),render,renderText, defaultRender
       renderFormItem: (item, { defaultRender, ...rest }, form) => {
         const status = form.getFieldValue('status');
-        if (`${status}` === '0') {
-          return false;
-        }
-        if (`${status}` === '3') {
-          return (
-            <Input
-              {...rest}
-              placeholder={intl.formatMessage({
-                id: 'pages.searchTable.exception',
-                defaultMessage: 'Please enter the reason for the exception!',
-              })}
-            />
-          );
-        }
+        // if (`${status}` === '0') {
+        //   return false;
+        // }
+        // if (`${status}` === '3') {
+        return <Input {...rest} placeholder="hahah" />;
+        // }
         return defaultRender(item);
       },
     },
@@ -342,6 +340,7 @@ const TableList: React.FC = () => {
         />
         <ProFormTextArea width="md" name="desc" />
       </ModalForm>
+
       <UpdateForm
         onSubmit={async (value) => {
           const success = await handleUpdate(value);

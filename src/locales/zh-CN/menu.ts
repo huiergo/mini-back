@@ -1,4 +1,8 @@
 export default {
+  'menu.content': '内容管理',
+  'menu.content.question': '面试题管理',
+  'menu.content.interview': '面经管理',
+  'menu.feedback': '反馈管理',
   'menu.welcome': '欢迎',
   'menu.more-blocks': '更多区块',
   'menu.home': '首页',
