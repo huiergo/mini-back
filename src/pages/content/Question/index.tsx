@@ -97,12 +97,12 @@ const Question: React.FC = () => {
     {
       title: <FormattedMessage id="pages.questionTable.checkStatus" defaultMessage="checkStatus" />,
       dataIndex: 'checkStatus',
-      initialValue: 'all',
+      initialValue: 0,
       hideInDescriptions: true,
       valueEnum: {
-        all: { text: '全部', status: 0 },
-        true: { text: '是', status: 1 },
-        false: { text: '否', status: 2 },
+        0: { text: '全部', status: 0 },
+        1: { text: '是', status: 1 },
+        2: { text: '否', status: 2 },
       },
     },
     {

@@ -34,6 +34,12 @@ const Feedback: React.FC = () => {
     {
       dataIndex: 'feedStatus',
       title: <FormattedMessage id="pages.feedbackTable.feedStatus" defaultMessage="feedStatus" />,
+      initialValue: 0,
+      hideInDescriptions: true,
+      valueEnum: {
+        0: { text: '否', status: 0 },
+        1: { text: '是', status: 1 },
+      },
     },
 
     {
