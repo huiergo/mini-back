@@ -79,4 +79,12 @@ export default {
   'pages.questionTable.options.pushQuestion': '推送',
   'pages.questionTable.options.changeTags': '修改知识点',
   'pages.questionTable.options.del': '删除',
+
+  'pages.feedbackTable.feedTime': '反馈时间',
+  'pages.feedbackTable.feedCategory': '反馈类型',
+  'pages.feedbackTable.feedAdvice': '反馈建议',
+  'pages.feedbackTable.feedStatus': '审核状态',
+  'pages.feedbackTable.options': '操作',
+  'pages.feedbackTable.options.redirectToQuestion': '定位到题目',
+  'pages.feedbackTable.options.HandleIt': '已处理',
 };
