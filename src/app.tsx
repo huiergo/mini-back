@@ -8,6 +8,7 @@ import Footer from '@/components/Footer';
 import { currentUser as queryCurrentUser } from './services/ant-design-pro/api';
 import { BookOutlined, LinkOutlined } from '@ant-design/icons';
 import defaultSettings from '../config/defaultSettings';
+import { instance } from './auth';
 
 const isDev = process.env.NODE_ENV === 'development';
 const loginPath = '/user/login';
@@ -28,10 +29,13 @@ export async function getInitialState(): Promise<{
 }> {
   const fetchUserInfo = async () => {
     try {
+      // queryCurrentUser 入参从storage中取
       const msg = await queryCurrentUser();
       return msg.data;
     } catch (error) {
-      history.push(loginPath);
+      console.log('[error]', error);
+      // history.push(loginPath);
+      // instance.login();
     }
     return undefined;
   };
@@ -61,10 +65,21 @@ export const layout: RunTimeLayoutConfig = ({ initialState, setInitialState }) =
     footerRender: () => <Footer />,
     onPageChange: () => {
       const { location } = history;
+      console.log('[onPageChange]', location);
+      instance.init({ 'login-required': true }).then((authenticated: boolean) => {
+        console.log('[authenticated]', authenticated);
+        if (authenticated) {
+          localStorage.setItem('token', instance.token); // 将token存入本地缓存
+          localStorage.setItem('user-config', JSON.stringify(instance.tokenParsed)); // 将用户信息存入本地缓存
+          // dispatch({ type: 'user/saveCurrentUser', payload: instance.tokenParsed });
+        } else {
+          instance.login();
+        }
+      });
       // 如果没有登录，重定向到 login
-      if (!initialState?.currentUser && location.pathname !== loginPath) {
-        history.push(loginPath);
-      }
+      // if (!initialState?.currentUser && location.pathname !== loginPath) {
+      //   history.push(loginPath);
+      // }
     },
     links: isDev
       ? [
