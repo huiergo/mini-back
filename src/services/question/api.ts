@@ -20,3 +20,20 @@ export async function getQuestionList(
     ...(options || {}),
   });
 }
+
+export async function getQuestionManagerList(
+  params: {
+    current?: number;
+    pageSize?: number;
+  },
+  options?: {
+    [key: string]: any;
+  },
+) {
+  return request<QuestionAPI.QuestionItem>('/api/questionList', {
+    params: {
+      ...params,
+    },
+    ...(options || {}),
+  });
+}

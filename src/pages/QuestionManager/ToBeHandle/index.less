@@ -1,0 +1,38 @@
+// .defaultHeight {
+//   .filter {
+//     height: 300;
+//     overflow: scroll;
+//   }
+// }
+
+// .hiddenFilter {
+//   .filter {
+//     height: 50;
+//     overflow: hidden;
+//   }
+// }
+
+.feed {
+  :global(.ant-list-item-extra) {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: flex-start;
+    padding-top: 32px;
+    // background-color: green;
+  }
+}
+.hiddenFilter {
+  .filter {
+    height: 100;
+  }
+  :global {
+    .ant-tabs-top > .ant-tabs-nav {
+      margin-bottom: 0;
+    }
+  }
+}
+
+.filter {
+  overflow: hidden;
+}

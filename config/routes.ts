@@ -19,7 +19,12 @@
       },
     ],
   },
-
+  {
+    name: 'questionManager',
+    icon: 'GithubOutlined',
+    path: '/questionManager',
+    component: './QuestionManager',
+  },
   {
     name: 'feedback',
     icon: 'GithubOutlined',
