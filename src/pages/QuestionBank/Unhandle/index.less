@@ -1,17 +1,3 @@
-// .defaultHeight {
-//   .filter {
-//     height: 300;
-//     overflow: scroll;
-//   }
-// }
-
-// .hiddenFilter {
-//   .filter {
-//     height: 50;
-//     overflow: hidden;
-//   }
-// }
-
 .toBeHandle {
   :global {
     .ant-list-item-extra {
@@ -21,10 +7,9 @@
       justify-content: flex-start;
       padding-top: 32px;
     }
-
-    // .ant-pro-list-row-header-title {
-    //   display: block;
-    // }
+    .ant-list-item-meta-title {
+      margin-bottom: 0;
+    }
   }
 }
 .hiddenFilter {
@@ -40,4 +25,14 @@
 
 .filter {
   overflow: hidden;
+}
+
+.alignRow {
+  // margin-top: 32px;
+  // background-color: lightblue;
+}
+.alignCol {
+  padding-right: 32px;
+  text-align: right;
+  // background-color: lightcoral;
 }

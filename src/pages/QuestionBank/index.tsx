@@ -1,39 +1,29 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { FormattedMessage } from 'umi';
-import { Button, Divider, Drawer, message, Tabs, Card, Input, Badge } from 'antd';
-
+import { Divider, Tabs } from 'antd';
 import { PageContainer } from '@ant-design/pro-layout';
 import ProTable from '@ant-design/pro-table';
-import type { ProColumns, ActionType } from '@ant-design/pro-table';
-import ProDescriptions from '@ant-design/pro-descriptions';
-import ProCard from '@ant-design/pro-card';
-import ProForm, {
-  ProFormSelect,
-  QueryFilter,
-  ProFormText,
-  ProFormDatePicker,
-} from '@ant-design/pro-form';
+import type { ProColumns } from '@ant-design/pro-table';
+import ProForm, { ProFormSelect, QueryFilter, ProFormText } from '@ant-design/pro-form';
 import type { ProFormInstance } from '@ant-design/pro-form';
-
 import { getQuestionManagerList } from '@/services/question/api';
-import ToBeHandle from './ToBeHandle';
+import Unhandle from './Unhandle';
 import styles from './index.less';
-import GroupField from './GroupField';
-const { TabPane } = Tabs;
 
 type StatusType = 'toBeHandle' | 'all' | 'handled';
 
-// type AdvancedSearchProps = {
-//   onFilterChange?: (allValues: any) => void;
-//   onSearch?: (text: string) => void;
-//   onTypeChange?: (type: string) => void;
-//   defaultType?: string;
-// };
 const QuestionManager: React.FC = (props) => {
   const [currentRow, setCurrentRow] = useState<QuestionAPI.QuestionItem>();
   const [drawerVisible, handleDrawerVisible] = useState<boolean>(false);
-
   const [activeKey, setActiveKey] = useState<StatusType>('all');
+
+  const queryformRef = useRef<
+    ProFormInstance<{
+      name: string;
+      company?: string;
+      useMode?: string;
+    }>
+  >();
 
   const columns: ProColumns<QuestionAPI.QuestionItem>[] = [
     {
@@ -148,15 +138,9 @@ const QuestionManager: React.FC = (props) => {
     },
   ];
 
-  const queryformRef = useRef<
-    ProFormInstance<{
-      name: string;
-      company?: string;
-      useMode?: string;
-    }>
-  >();
   return (
     <PageContainer className={styles.manager}>
+      {/* 筛选和Tab区域 */}
       <div style={{ background: '#fff', padding: 32, paddingBottom: 0 }}>
         <QueryFilter
           formRef={queryformRef}
@@ -166,7 +150,6 @@ const QuestionManager: React.FC = (props) => {
           split
           onValuesChange={async () => {
             queryformRef.current?.validateFieldsReturnFormatValue?.().then((val) => {
-              // 以下为格式化之后的表单值
               console.log('[onValuesChange]', val);
             });
           }}
@@ -199,6 +182,7 @@ const QuestionManager: React.FC = (props) => {
           <Tabs.TabPane key="handled" tab="审核记录" />
         </Tabs>
       </div>
+      {/* 全部试题 */}
       {activeKey == 'all' && (
         <ProTable<QuestionAPI.QuestionItem, QuestionAPI.PageParams>
           request={getQuestionManagerList}
@@ -206,9 +190,9 @@ const QuestionManager: React.FC = (props) => {
           columns={columns}
           rowKey="id"
           options={false}
-          // toolBarRender={}
         ></ProTable>
       )}
+      {/* 审核记录 */}
       {activeKey == 'handled' && (
         <ProTable<QuestionAPI.QuestionItem, QuestionAPI.PageParams>
           request={getQuestionManagerList}
@@ -216,10 +200,10 @@ const QuestionManager: React.FC = (props) => {
           columns={columns}
           rowKey="id"
           options={false}
-          // toolBarRender={}
         ></ProTable>
       )}
-      {activeKey == 'toBeHandle' && <ToBeHandle />}
+      {/* 待优化 */}
+      {activeKey == 'toBeHandle' && <Unhandle />}
     </PageContainer>
   );
 };

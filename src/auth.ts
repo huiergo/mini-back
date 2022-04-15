@@ -6,7 +6,7 @@ const config = {
       ? 'https://auth.itcast.cn/auth'
       : 'https://auth-t.itcast.cn/auth',
   realm: process.env.buildType === 'pro' ? 'itcast' : 'Test',
-  clientId: 'teach_training',
+  clientId: 'teaching-wxoptClient',
 };
 // const config = {
 //   url: 'https://auth-t.itcast.cn/auth',

@@ -20,10 +20,10 @@
     ],
   },
   {
-    name: 'questionManager',
+    name: 'questionBank',
     icon: 'GithubOutlined',
-    path: '/questionManager',
-    component: './QuestionManager',
+    path: '/questionBank',
+    component: './QuestionBank',
   },
   {
     name: 'feedback',

@@ -12,6 +12,7 @@ import {
 } from '@ant-design/icons';
 import ProList from '@ant-design/pro-list';
 import FeedArea from '@/components/FeedArea';
+import ManageHeader from '@/components/ManageHead';
 import styles from './index.less';
 
 const IconText = ({ icon, text }: { icon: any; text: string }) => (
@@ -23,11 +24,11 @@ const IconText = ({ icon, text }: { icon: any; text: string }) => (
 
 const dataSource = [
   {
-    name: '什么是盒子模型',
+    name: '什么是盒子模型????',
     image:
       'https://gw.alipayobjects.com/zos/antfincdn/efFD%24IOql2/weixintupian_20170331104822.jpg',
     desc: '我是一条测试的描述',
-    tags: ['内容重复', '题目不正确'],
+    tags: ['内容重复', '题目不正确', '内容重复', '题目不正确', '内容重复', '题目不正确'],
     content: `  111段落示意：蚂蚁金服设计平台
     design.alipay.com，用最小的工作量，无缝接入蚂蚁金服生态，提供跨越设计与开发的体验解决方案。蚂蚁金服设计平台
     design.alipay.com，用最小的工作量，无缝接入蚂蚁金服生态提供跨越设计与开发的体验解决方案。
@@ -90,7 +91,7 @@ export default () => {
 
   return (
     <ProList<ItemType>
-      className={styles.feed}
+      className={styles.toBeHandle}
       toolBarRender={() => {
         return [
           <Button key="3" type="primary">
@@ -126,27 +127,48 @@ export default () => {
       dataSource={dataSource}
       metas={{
         title: {
-          dataIndex: 'name',
-        },
-
-        subTitle: {
-          dataIndex: 'name',
+          // dataIndex: 'name',
           render: (_, row) => {
             console.log('[subTitle row]', row);
             console.log('[subTitle _]', _);
             return (
-              <Space size={0}>
-                {row.tags?.map((i) => (
-                  <Tag color="default" key={i}>
-                    {i}
-                  </Tag>
-                ))}
-                <Rate disabled defaultValue={2} />
-              </Space>
+              <div style={{ width: '100%' }}>
+                <ManageHeader tags={row?.tags} name={row?.name} />
+              </div>
+              // <div>
+              //   {row.tags?.map((i) => (
+              //     <Tag color="default" key={i}>
+              //       {i}
+              //     </Tag>
+              //   ))}
+
+              //   <div>
+              //     {row.name}
+              //     <Rate disabled defaultValue={2} />
+              //   </div>
+              // </div>
             );
           },
-          search: false,
         },
+
+        // subTitle: {
+        //   dataIndex: 'name',
+        //   render: (_, row) => {
+        //     console.log('[subTitle row]', row);
+        //     console.log('[subTitle _]', _);
+        //     return (
+        //       <Space size={0}>
+        //         {row.tags?.map((i) => (
+        //           <Tag color="default" key={i}>
+        //             {i}
+        //           </Tag>
+        //         ))}
+        //         <Rate disabled defaultValue={2} />
+        //       </Space>
+        //     );
+        //   },
+        //   search: false,
+        // },
         actions: {
           render: (text, entity, index, action) => [
             <Button key="link">
@@ -182,9 +204,9 @@ export default () => {
             </Button>,
           ],
         },
-        extra: {
-          render: (dom, entity, index, action) => <FeedArea tags={entity?.tags} />,
-        },
+        // extra: {
+        //   render: (dom, entity, index, action) => <FeedArea tags={entity?.tags} />,
+        // },
         content: {
           render: (dom, entity, index, action) => {
             return (

@@ -27,6 +27,16 @@ export async function getInitialState(): Promise<{
   loading?: boolean;
   fetchUserInfo?: () => Promise<API.CurrentUser | undefined>;
 }> {
+  instance.init({ 'login-required': true }).then((authenticated: boolean) => {
+    console.log('[authenticated]', authenticated);
+    if (authenticated) {
+      localStorage.setItem('token', instance.token); // 将token存入本地缓存
+      localStorage.setItem('user-config', JSON.stringify(instance.tokenParsed)); // 将用户信息存入本地缓存
+      // dispatch({ type: 'user/saveCurrentUser', payload: instance.tokenParsed });
+    } else {
+      instance.login();
+    }
+  });
   const fetchUserInfo = async () => {
     try {
       // queryCurrentUser 入参从storage中取
@@ -66,16 +76,16 @@ export const layout: RunTimeLayoutConfig = ({ initialState, setInitialState }) =
     onPageChange: () => {
       const { location } = history;
       console.log('[onPageChange]', location);
-      instance.init({ 'login-required': true }).then((authenticated: boolean) => {
-        console.log('[authenticated]', authenticated);
-        if (authenticated) {
-          localStorage.setItem('token', instance.token); // 将token存入本地缓存
-          localStorage.setItem('user-config', JSON.stringify(instance.tokenParsed)); // 将用户信息存入本地缓存
-          // dispatch({ type: 'user/saveCurrentUser', payload: instance.tokenParsed });
-        } else {
-          instance.login();
-        }
-      });
+      // instance.init({ 'login-required': true }).then((authenticated: boolean) => {
+      //   console.log('[authenticated]', authenticated);
+      //   if (authenticated) {
+      //     localStorage.setItem('token', instance.token); // 将token存入本地缓存
+      //     localStorage.setItem('user-config', JSON.stringify(instance.tokenParsed)); // 将用户信息存入本地缓存
+      //     // dispatch({ type: 'user/saveCurrentUser', payload: instance.tokenParsed });
+      //   } else {
+      //     instance.login();
+      //   }
+      // });
       // 如果没有登录，重定向到 login
       // if (!initialState?.currentUser && location.pathname !== loginPath) {
       //   history.push(loginPath);
