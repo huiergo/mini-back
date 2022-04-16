@@ -22,19 +22,19 @@ declare namespace QuestionAPI {
     id?: string; //主键id
     questionNo?: string; //试题编号
     questionId?: string; //试题id
-    // label?: string; // 知识点
-    // likeCount?: number;
-    // views?: number;
-    // updatedAt?: string; //最后修改时间
-    // updator?: string; // 优化人,多个逗号分割
-    // stem?: string; // 题目title
-    // answer?: string; // 答案
-    // difficulty?: number; // 难度星级
-    // state?: number; //处理状态代码：0待优化1已优化
-    // stateValue?: string; //处理状态值0待优化1已优化
-    // feedback?: {
-    //   feedbackInfo?: string[]; //反馈信息集合
-    //   type?: string; // 反馈类型信息
-    // };
+    label?: string; // 知识点
+    likeCount?: number;
+    views?: number;
+    updatedAt?: string; //最后修改时间
+    updator?: string; // 优化人,多个逗号分割
+    stem?: string; // 题目title
+    answer?: string; // 答案
+    difficulty?: number; // 难度星级
+    state?: number; //处理状态代码：0待优化1已优化
+    stateValue?: string; //处理状态值0待优化1已优化
+    feedback?: {
+      feedbackInfo?: string[]; //反馈信息集合
+      type?: string; // 反馈类型信息
+    };
   };
 }

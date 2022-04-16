@@ -2,30 +2,54 @@ import React, { useState } from 'react';
 import { Button, Tag, Card, Rate, Row, Col } from 'antd';
 import { UploadOutlined, UpOutlined, DownOutlined } from '@ant-design/icons';
 import ProList from '@ant-design/pro-list';
-import { useModel, useRequest } from 'umi';
-
+import { useRequest } from 'umi';
 import styles from './index.less';
-import { dataSource } from './data';
-import { ItemType } from './typing';
 import MarkWidget from '@/components/MarkWidget';
 import { getQuestionManagerList } from '@/services/question/api';
 
 export default () => {
-  const [currentRow, setCurrentRow] = useState<ItemType>();
+  const [currentRow, setCurrentRow] = useState<QuestionAPI.ManagerQuestionItem>();
   const [showFilter, setShowFilter] = useState<boolean>(true);
-  const data = useRequest(() => {
-    return getQuestionManagerList({
-      searchType: 0,
-    });
-  });
-  console.log('[getQuestionManagerList data]', data);
+  // todo: useRequest 和 request 对比
+  // const data = useRequest(() => {
+  //   return getQuestionManagerList({
+  //     searchType: 0,
+  //   });
+  // });
+  // console.log('[getQuestionManagerList data]', data);
   return (
-    <ProList<ItemType>
+    <ProList<QuestionAPI.ManagerQuestionItem>
       className={styles.toBeHandle}
       split={true}
       itemLayout="vertical"
       rowKey="name"
-      dataSource={dataSource}
+      // dataSource={dataSource}
+      request={async (
+        // 第一个参数 params 查询表单和 params 参数的结合
+        // 第一个参数中一定会有 pageSize 和  current ，这两个参数是 antd 的规范
+        params: T & {
+          pageSize: number;
+          current: number;
+        },
+        sort,
+        filter,
+      ) => {
+        // 这里需要返回一个 Promise,在返回之前你可以进行数据转化
+        // 如果需要转化参数可以在这里进行修改
+        const msg = await getQuestionManagerList({
+          current: params.current,
+          pageSize: params.pageSize,
+          searchType: 2,
+        });
+        console.log('[msg]', msg);
+        const { rows, total, pageTotal } = msg?.data;
+        return {
+          data: rows,
+          success: true,
+          total: total,
+          current: pageTotal,
+        };
+      }}
       metas={{
         title: {
           render: (_, row) => {
@@ -33,10 +57,19 @@ export default () => {
               <Row gutter={[2, 2]}>
                 <Col span={16}>
                   <Tag color="default" style={{ color: '#3C3E42', background: '#F6F7F9' }}>
-                    移动web
+                    {row?.label}
                   </Tag>
-                  <Tag color="default" style={{ color: '#3C3E42', background: '#F6F7F9' }}>
-                    内容不准确；题目重复；内容不准确；题目重复；内容不准确；题目重复；内容不准确；题目重复；
+                  {/* todo: tag wrap 换行 */}
+                  <Tag
+                    color="default"
+                    style={{
+                      color: '#3C3E42',
+                      background: '#F6F7F9',
+                      wordWrap: 'break-word',
+                      wordBreak: 'break-all',
+                    }}
+                  >
+                    {row?.feedback?.type}
                   </Tag>
                 </Col>
               </Row>
@@ -59,15 +92,15 @@ export default () => {
               className={styles.filterTrigger}
               onClick={() => {
                 setCurrentRow(entity);
-                currentRow?.name === entity?.name
+                currentRow?.stem === entity?.stem
                   ? setShowFilter(!showFilter)
                   : setShowFilter(false);
               }}
             >
               {index}
 
-              {currentRow?.name === entity?.name ? (showFilter ? '展开' : '收起') : '展开'}
-              {currentRow?.name === entity?.name ? (
+              {currentRow?.stem === entity?.stem ? (showFilter ? '展开' : '收起') : '展开'}
+              {currentRow?.stem === entity?.stem ? (
                 showFilter ? (
                   <UpOutlined />
                 ) : (
@@ -87,7 +120,7 @@ export default () => {
                 <Row gutter={4}>
                   <Col span={16}>
                     <Card
-                      title={entity?.name}
+                      title={entity?.stem}
                       extra={<Rate disabled defaultValue={2} />}
                       bodyStyle={{
                         paddingBottom: 0,
@@ -95,7 +128,7 @@ export default () => {
                       }}
                       bordered={false}
                       className={
-                        currentRow?.name === entity?.name
+                        currentRow?.stem === entity?.stem
                           ? showFilter
                             ? ''
                             : styles.hiddenFilter
@@ -106,20 +139,20 @@ export default () => {
                         className={styles.filter}
                         style={{
                           overflowY:
-                            currentRow?.name === entity?.name
+                            currentRow?.stem === entity?.stem
                               ? showFilter
                                 ? 'auto'
                                 : 'scroll'
                               : 'auto',
                           height:
-                            currentRow?.name === entity?.name
+                            currentRow?.stem === entity?.stem
                               ? showFilter
                                 ? '172px'
                                 : 'auto'
                               : '172px',
                         }}
                       >
-                        <MarkWidget>{entity?.content}</MarkWidget>
+                        <MarkWidget>{entity?.answer}</MarkWidget>
                       </div>
                     </Card>
                   </Col>
@@ -128,7 +161,7 @@ export default () => {
                       <div
                         style={{
                           maxHeight:
-                            currentRow?.name === entity?.name
+                            currentRow?.stem === entity?.stem
                               ? showFilter
                                 ? '172px'
                                 : '800px'
@@ -136,15 +169,11 @@ export default () => {
                           overflowY: 'scroll',
                         }}
                       >
-                        <Tag color="default" style={{ color: '#3C3E42', background: '#EDF2FF' }}>
-                          内容不准确；
-                        </Tag>
-                        <Tag color="default" style={{ color: '#3C3E42', background: '#EDF2FF' }}>
-                          内容不准确；题目重复；内容不准确；
-                        </Tag>
-                        <Tag color="default" style={{ color: '#3C3E42', background: '#EDF2FF' }}>
-                          内容不准确；题目重复；内容不准确；题目重复；内容不准确；题目重复；内容不准确；题目重复；
-                        </Tag>
+                        {entity?.feedback?.feedbackInfo?.map((i) => (
+                          <Tag color="default" style={{ color: '#3C3E42', background: '#EDF2FF' }}>
+                            {i}
+                          </Tag>
+                        ))}
                       </div>
                     </Card>
                   </Col>
