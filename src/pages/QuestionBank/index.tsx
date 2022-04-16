@@ -42,28 +42,28 @@ const QuestionManager: React.FC = (props) => {
       dataIndex: 'questionNo',
       title: <FormattedMessage id="pages.questionTable.questionNo" defaultMessage="questionNo" />,
     },
-    // {
-    //   dataIndex: 'stem',
-    //   title: <FormattedMessage id="pages.questionTable.title" defaultMessage="stem" />,
-    //   ellipsis: true,
-    //   render: (dom, record) => {
-    //     return <a>{record?.stem}</a>;
-    //   },
-    // },
-    // {
-    //   title: <FormattedMessage id="pages.questionTable.answer" defaultMessage="answer" />,
-    //   dataIndex: 'answer',
-    //   hideInTable: true,
-    //   hideInSearch: true,
-    // },
-    // {
-    //   title: <FormattedMessage id="pages.questionTable.tags" defaultMessage="label" />,
-    //   dataIndex: 'label',
-    //   render: (dom, record) => {
-    //     console.log('[tags]', dom, record);
-    //     return <>{dom + ';'}</>;
-    //   },
-    // },
+    {
+      dataIndex: 'stem',
+      title: <FormattedMessage id="pages.questionTable.title" defaultMessage="stem" />,
+      ellipsis: true,
+      render: (dom, record) => {
+        return <a>{record?.stem}</a>;
+      },
+    },
+    {
+      title: <FormattedMessage id="pages.questionTable.answer" defaultMessage="answer" />,
+      dataIndex: 'answer',
+      hideInTable: true,
+      hideInSearch: true,
+    },
+    {
+      title: <FormattedMessage id="pages.questionTable.tags" defaultMessage="label" />,
+      dataIndex: 'label',
+      render: (dom, record) => {
+        console.log('[tags]', dom, record);
+        return <>{dom + ';'}</>;
+      },
+    },
     // {
     //   title: <FormattedMessage id="pages.questionTable.views" defaultMessage="views" />,
     //   dataIndex: 'views',
@@ -76,17 +76,17 @@ const QuestionManager: React.FC = (props) => {
     //   hideInSearch: true,
     //   hideInDescriptions: true,
     // },
-    // {
-    //   title: <FormattedMessage id="pages.questionTable.checkStatus" defaultMessage="stateValue" />,
-    //   dataIndex: 'stateValue',
-    //   initialValue: 0,
-    //   hideInDescriptions: true,
-    //   valueEnum: {
-    //     0: { text: '全部', status: 0 },
-    //     1: { text: '是', status: 1 },
-    //     2: { text: '否', status: 2 },
-    //   },
-    // },
+    {
+      title: <FormattedMessage id="pages.questionTable.checkStatus" defaultMessage="stateValue" />,
+      dataIndex: 'stateValue',
+      initialValue: 0,
+      hideInDescriptions: true,
+      valueEnum: {
+        0: { text: '全部', status: 0 },
+        1: { text: '是', status: 1 },
+        2: { text: '否', status: 2 },
+      },
+    },
     // {
     //   title: <FormattedMessage id="pages.questionTable.owner" defaultMessage="updator" />,
     //   dataIndex: 'updator',
@@ -97,44 +97,44 @@ const QuestionManager: React.FC = (props) => {
     //     return <>{dom + ' ;'}</>;
     //   },
     // },
-    // {
-    //   title: <FormattedMessage id="pages.questionTable.updatedAt" defaultMessage="updatedAt" />,
-    //   dataIndex: 'updatedAt',
-    //   hideInSearch: true,
-    //   hideInDescriptions: true,
-    // },
-    // {
-    //   title: <FormattedMessage id="pages.questionTable.options" defaultMessage="options" />,
-    //   dataIndex: 'options',
-    //   hideInSearch: true,
-    //   hideInDescriptions: true,
-    //   render: (_, record) => (
-    //     <>
-    //       <a
-    //         onClick={() => {
-    //           setCurrentRow(record);
-    //           handleDrawerVisible(true);
-    //           console.log('打开抽屉Modal', record);
-    //         }}
-    //       >
-    //         查看
-    //       </a>
-    //       <Divider type="vertical" />
-    //       <a
-    //         onClick={() => {
-    //           setCurrentRow(record);
-    //           handleDrawerVisible(true);
-    //         }}
-    //       >
-    //         编辑
-    //       </a>
-    //       <Divider type="vertical" />
-    //       <a href="">删除</a>
-    //       <Divider type="vertical" />
-    //       <a href="">不需优化</a>
-    //     </>
-    //   ),
-    // },
+    {
+      title: <FormattedMessage id="pages.questionTable.updatedAt" defaultMessage="updatedAt" />,
+      dataIndex: 'updatedAt',
+      hideInSearch: true,
+      hideInDescriptions: true,
+    },
+    {
+      title: <FormattedMessage id="pages.questionTable.options" defaultMessage="options" />,
+      dataIndex: 'options',
+      hideInSearch: true,
+      hideInDescriptions: true,
+      render: (_, record) => (
+        <>
+          <a
+            onClick={() => {
+              setCurrentRow(record);
+              handleDrawerVisible(true);
+              console.log('打开抽屉Modal', record);
+            }}
+          >
+            查看
+          </a>
+          <Divider type="vertical" />
+          <a
+            onClick={() => {
+              setCurrentRow(record);
+              handleDrawerVisible(true);
+            }}
+          >
+            编辑
+          </a>
+          <Divider type="vertical" />
+          <a href="">删除</a>
+          <Divider type="vertical" />
+          <a href="">不需优化</a>
+        </>
+      ),
+    },
   ];
 
   return (
@@ -184,18 +184,7 @@ const QuestionManager: React.FC = (props) => {
       {/* 全部试题 */}
       {activeKey == 'all' && (
         <ProTable<QuestionAPI.ManagerQuestionItem, QuestionAPI.PageParams>
-          // request={() => {
-          //   let data = getQuestionManagerList({
-          //     searchType: 0,
-          //   });
-          //   console.log('[111]', data);
-          //   return data;
-          //   // return getQuestionManagerList({
-          //   //   searchType: 0,
-          //   // });
-          // }}
-          // params={params}
-
+          // todo: request 这里简化代码，让其在其他地方处理数据，返回这四个值
           request={async (
             // 第一个参数 params 查询表单和 params 参数的结合
             // 第一个参数中一定会有 pageSize 和  current ，这两个参数是 antd 的规范
@@ -229,19 +218,40 @@ const QuestionManager: React.FC = (props) => {
         ></ProTable>
       )}
       {/* 审核记录 */}
-      {/* {activeKey == 'handled' && (
+      {activeKey == 'handled' && (
         <ProTable<QuestionAPI.ManagerQuestionItem, QuestionAPI.PageParams>
-          request={() => {
-            return getQuestionManagerList({
-              searchType: 0,
+          request={async (
+            // 第一个参数 params 查询表单和 params 参数的结合
+            // 第一个参数中一定会有 pageSize 和  current ，这两个参数是 antd 的规范
+            params: T & {
+              pageSize: number;
+              current: number;
+            },
+            sort,
+            filter,
+          ) => {
+            // 这里需要返回一个 Promise,在返回之前你可以进行数据转化
+            // 如果需要转化参数可以在这里进行修改
+            const msg = await getQuestionManagerList({
+              current: params.current,
+              pageSize: params.pageSize,
+              searchType: 1,
             });
+            console.log('[msg]', msg);
+            const { rows, total, pageTotal } = msg?.data;
+            return {
+              data: rows,
+              success: true,
+              total: total,
+              current: pageTotal,
+            };
           }}
           search={false}
           columns={columns}
           rowKey="id"
           options={false}
         ></ProTable>
-      )} */}
+      )}
       {/* 待优化 */}
       {/* {activeKey == 'toBeHandle' && <Unhandle />} */}
     </PageContainer>
