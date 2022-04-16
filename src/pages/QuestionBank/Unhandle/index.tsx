@@ -2,15 +2,23 @@ import React, { useState } from 'react';
 import { Button, Tag, Card, Rate, Row, Col } from 'antd';
 import { UploadOutlined, UpOutlined, DownOutlined } from '@ant-design/icons';
 import ProList from '@ant-design/pro-list';
+import { useModel, useRequest } from 'umi';
+
 import styles from './index.less';
 import { dataSource } from './data';
 import { ItemType } from './typing';
 import MarkWidget from '@/components/MarkWidget';
+import { getQuestionManagerList } from '@/services/question/api';
 
 export default () => {
   const [currentRow, setCurrentRow] = useState<ItemType>();
   const [showFilter, setShowFilter] = useState<boolean>(true);
-
+  const data = useRequest(() => {
+    return getQuestionManagerList({
+      searchType: 0,
+    });
+  });
+  console.log('[getQuestionManagerList data]', data);
   return (
     <ProList<ItemType>
       className={styles.toBeHandle}

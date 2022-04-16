@@ -25,12 +25,13 @@ export async function getQuestionManagerList(
   params: {
     current?: number;
     pageSize?: number;
+    searchType?: number;
   },
   options?: {
     [key: string]: any;
   },
 ) {
-  return request<QuestionAPI.QuestionItem>('/api/questionList', {
+  return request<QuestionAPI.ManagerQuestionItem>('/wxManagement/question/list', {
     params: {
       ...params,
     },

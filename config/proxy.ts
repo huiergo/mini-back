@@ -9,10 +9,11 @@
 export default {
   dev: {
     // localhost:8000/api/** -> https://preview.pro.ant.design/api/**
-    '/api/': {
+    '/wxManagement/': {
       // 要代理的地址
       // target: 'https://preview.pro.ant.design',
-      target: 'http://localhost:9999',
+      // target: 'http://localhost:9999',
+      target: 'https://mock.boxuegu.com/mock/1508',
       // 配置了这个可以从 http 代理到 https
       // 依赖 origin 的功能可能需要这个，比如 cookie
       changeOrigin: true,
