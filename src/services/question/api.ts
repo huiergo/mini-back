@@ -26,6 +26,9 @@ export async function getQuestionManagerList(
     current?: number;
     pageSize?: number;
     searchType?: number;
+    subject?: string;
+    stem?: string;
+    label?: string;
   },
   options?: {
     [key: string]: any;

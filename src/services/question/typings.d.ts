@@ -16,6 +16,9 @@ declare namespace QuestionAPI {
   type PageParams = {
     current?: number;
     pageSize?: number;
+    subject?: string;
+    stem?: string;
+    label?: string;
   };
 
   type ManagerQuestionItem = {
