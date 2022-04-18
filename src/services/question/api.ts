@@ -41,3 +41,23 @@ export async function getQuestionManagerList(
     ...(options || {}),
   });
 }
+
+export async function deleteQuestion(
+  params: {
+    current?: number;
+    pageSize?: number;
+    feedback?: boolean;
+    type?: number;
+    id?: string;
+  },
+  options?: {
+    [key: string]: any;
+  },
+) {
+  return request<QuestionAPI.ManagerQuestionItem>('/wxManagement/question/deal', {
+    params: {
+      ...params,
+    },
+    ...(options || {}),
+  });
+}

@@ -1,16 +1,20 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { FormattedMessage } from 'umi';
-import { Divider, Tabs, Input, message } from 'antd';
+import { Divider, Tabs, Input } from 'antd';
 import { PageContainer } from '@ant-design/pro-layout';
 import ProTable from '@ant-design/pro-table';
-import type { ProColumns, ActionType } from '@ant-design/pro-table';
+import type { ProColumns } from '@ant-design/pro-table';
 import ProForm, { ProFormSelect, QueryFilter, ProFormText } from '@ant-design/pro-form';
 import type { ProFormInstance } from '@ant-design/pro-form';
-import { getQuestionManagerList, deleteQuestion } from '@/services/question/api';
+import { getQuestionManagerList } from '@/services/question/api';
 import Unhandle from './Unhandle';
 import styles from './index.less';
 
 type StatusType = 'toBeHandle' | 'all' | 'handled';
+
+/* todo: 1. title 占位去掉 2. 宽度固定&UI样式 3.节流 */
+/* todo: 知识点检索区提供接口 */
+/* todo: 后端 subject */
 
 const QuestionManager: React.FC = (props) => {
   const [currentRow, setCurrentRow] = useState<QuestionAPI.QuestionItem>();
@@ -19,56 +23,10 @@ const QuestionManager: React.FC = (props) => {
   const [subject, setSubject] = useState<string>();
   const [stem, setStem] = useState<string>();
   const [label, setLabel] = useState<string>();
-  const actionRef = useRef<ActionType>();
+  const [pageSize, setPageSize] = useState<number>(0);
+  const [searchText, setSearchText] = useState<string>();
 
-  const deleteItem = async (record: QuestionAPI.ManagerQuestionItem, type: number) => {
-    let loadingText = type == 0 ? '处理中' : '正在删除';
-    let successText = type == 0 ? '处理完成' : '删除成功';
-    let failText = type == 0 ? '处理失败' : '删除失败';
-
-    const hide = message.loading(loadingText);
-    try {
-      await deleteQuestion({
-        type: type,
-        id: record.id,
-      });
-      actionRef.current?.reload?.();
-      hide();
-      message.success(successText);
-    } catch (error) {
-      hide();
-      message.error(failText);
-    }
-  };
-
-  const request = async (
-    params: T & {
-      pageSize: number;
-      current: number;
-      subject: string;
-      stem: string;
-      label: string;
-    },
-  ) => {
-    console.log('[request params]', params);
-    const msg = await getQuestionManagerList({
-      current: params.current,
-      pageSize: params.pageSize,
-      searchType: params.searchType,
-      subject: params.subject,
-      stem: params.stem,
-      label: params.label,
-    });
-    const { rows, total, pageTotal } = msg?.data;
-    return {
-      data: rows,
-      success: true,
-      total: total,
-      current: pageTotal,
-    };
-  };
-
-  const queryFormRef = useRef<
+  const queryformRef = useRef<
     ProFormInstance<{
       subject: string;
       stem: string;
@@ -99,6 +57,7 @@ const QuestionManager: React.FC = (props) => {
       title: <FormattedMessage id="pages.questionTable.tags" defaultMessage="label" />,
       dataIndex: 'label',
       render: (dom, record) => {
+        console.log('[tags]', dom, record);
         return <>{dom + ';'}</>;
       },
     },
@@ -145,9 +104,9 @@ const QuestionManager: React.FC = (props) => {
             编辑
           </a>
           <Divider type="vertical" />
-          <a onClick={() => deleteItem(record, 1)}>删除</a>
+          <a href="">删除</a>
           <Divider type="vertical" />
-          <a onClick={() => deleteItem(record, 0)}>不需优化</a>
+          <a href="">不需优化</a>
         </>
       ),
     },
@@ -161,11 +120,12 @@ const QuestionManager: React.FC = (props) => {
           span={24}
           labelWidth="auto"
           split
-          autoFocusFirstInput={false}
+          // onChange={(v) => console.log('[xxx]', v)}
           className={styles.filter}
-          formRef={queryFormRef}
+          formRef={queryformRef}
           onValuesChange={async () => {
-            queryFormRef.current?.validateFieldsReturnFormatValue?.().then((val) => {
+            // todo: 题干输入节流防抖
+            queryformRef.current?.validateFieldsReturnFormatValue?.().then((val) => {
               setSubject(val.subject);
               setLabel(val.label);
               console.log('[onValuesChange]', val);
@@ -174,17 +134,15 @@ const QuestionManager: React.FC = (props) => {
         >
           <ProForm.Group title=" ">
             <ProFormSelect
-              width="md"
               colProps={{ xl: 12, md: 12 }}
               name="subject"
-              placeholder="移动web与前端"
+              label="学科"
               valueEnum={{
                 1: '移动web与前端',
               }}
             />
             <ProFormSelect
-              width="md"
-              placeholder="知识点"
+              label="知识点"
               colProps={{ xl: 12, md: 12 }}
               name="label"
               valueEnum={{
@@ -193,9 +151,8 @@ const QuestionManager: React.FC = (props) => {
               }}
             />
             <Input.Search
-              width="md"
-              placeholder="题干关键词搜索"
-              enterButton
+              placeholder="请输入"
+              enterButton="搜索"
               size="middle"
               onSearch={(v) => setStem(v)}
               style={{ maxWidth: 522, width: '100%' }}
@@ -212,9 +169,45 @@ const QuestionManager: React.FC = (props) => {
       {/* 全部试题 */}
       {activeKey == 'all' && (
         <ProTable<QuestionAPI.ManagerQuestionItem, QuestionAPI.PageParams>
-          actionRef={actionRef}
           params={{ subject, stem, label }}
-          request={(params) => request({ ...params, searchType: 0 })}
+          // todo: request 这里简化代码，让其在其他地方处理数据，返回这四个值
+          request={async (
+            // 第一个参数 params 查询表单和 params 参数的结合
+            // 第一个参数中一定会有 pageSize 和  current ，这两个参数是 antd 的规范
+            params: T & {
+              pageSize: number;
+              current: number;
+              subject: string;
+              stem: string;
+              label: string;
+            },
+            sort,
+            // todo: filter 怎么使用
+            filter,
+          ) => {
+            // 这里需要返回一个 Promise,在返回之前你可以进行数据转化
+            // 如果需要转化参数可以在这里进行修改
+            const msg = await getQuestionManagerList({
+              current: params.current,
+              pageSize: params.pageSize,
+              searchType: 0,
+              subject: params.subject,
+              stem: params.stem,
+              label: params.label,
+              // todo: 这三个筛选的怎么关联 request
+              // subject:subject,
+              // stem,
+              // label,
+            });
+            console.log('[msg]', msg);
+            const { rows, total, pageTotal } = msg?.data;
+            return {
+              data: rows,
+              success: true,
+              total: total,
+              current: pageTotal,
+            };
+          }}
           search={false}
           columns={columns}
           rowKey="id"
@@ -224,8 +217,33 @@ const QuestionManager: React.FC = (props) => {
       {/* 审核记录 */}
       {activeKey == 'handled' && (
         <ProTable<QuestionAPI.ManagerQuestionItem, QuestionAPI.PageParams>
-          params={{ subject, stem, label }}
-          request={(params) => request({ ...params, searchType: 1 })}
+          params={{ subject }}
+          request={async (
+            // 第一个参数 params 查询表单和 params 参数的结合
+            // 第一个参数中一定会有 pageSize 和  current ，这两个参数是 antd 的规范
+            params: T & {
+              pageSize: number;
+              current: number;
+            },
+            sort,
+            filter,
+          ) => {
+            // 这里需要返回一个 Promise,在返回之前你可以进行数据转化
+            // 如果需要转化参数可以在这里进行修改
+            const msg = await getQuestionManagerList({
+              current: params.current,
+              pageSize: params.pageSize,
+              searchType: 1,
+            });
+            console.log('[msg]', msg);
+            const { rows, total, pageTotal } = msg?.data;
+            return {
+              data: rows,
+              success: true,
+              total: total,
+              current: pageTotal,
+            };
+          }}
           search={false}
           columns={columns}
           rowKey="id"
