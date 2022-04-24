@@ -3,7 +3,7 @@ import { FormattedMessage } from 'umi';
 import { Button, Divider, Drawer, message } from 'antd';
 import { PageContainer } from '@ant-design/pro-layout';
 import ProTable from '@ant-design/pro-table';
-import { getQuestionList } from '@/services/question/api';
+import { getOperationQuestionList } from '@/services/content/question/api';
 // 针对formRef的使用: getFieldsValue ,getFieldsError,resetFields,setFields,validateFields,submit
 import {
   ModalForm,
@@ -49,7 +49,7 @@ const Question: React.FC = () => {
       title: <FormattedMessage id="pages.questionTable.questionNo" defaultMessage="questionNo" />,
     },
     {
-      dataIndex: 'title',
+      dataIndex: 'stem',
       title: <FormattedMessage id="pages.questionTable.title" defaultMessage="title" />,
       ellipsis: true,
       render: (dom, record) => {
@@ -61,7 +61,7 @@ const Question: React.FC = () => {
               console.log('打开抽屉Modal', record);
             }}
           >
-            {record.title}
+            {record?.stem}
             {/* {dom} */}
           </a>
         );
@@ -79,7 +79,7 @@ const Question: React.FC = () => {
       render: (dom, record) => {
         console.log('[tags]', dom, record);
 
-        return <>{dom + ';'}</>;
+        return <>{record?.label}</>;
       },
     },
     {
@@ -96,23 +96,22 @@ const Question: React.FC = () => {
     },
     {
       title: <FormattedMessage id="pages.questionTable.checkStatus" defaultMessage="checkStatus" />,
-      dataIndex: 'checkStatus',
+      dataIndex: 'state',
       initialValue: 0,
       hideInDescriptions: true,
       valueEnum: {
-        0: { text: '全部', status: 0 },
-        1: { text: '是', status: 1 },
-        2: { text: '否', status: 2 },
+        0: { text: '待优化', status: 0 },
+        1: { text: '已优化', status: 1 },
       },
     },
     {
       title: <FormattedMessage id="pages.questionTable.owner" defaultMessage="owner" />,
-      dataIndex: 'owner',
+      dataIndex: 'updator',
       hideInSearch: true,
       hideInDescriptions: true,
       render: (dom, record) => {
         console.log('[owner]', dom, record);
-        return <>{dom + ' ;'}</>;
+        return <>{record?.updator} </>;
       },
     },
     {
@@ -152,10 +151,38 @@ const Question: React.FC = () => {
     },
   ];
 
+  const request = async (
+    params: T & {
+      pageSize: number;
+      current: number;
+      subject: string;
+      stem: string;
+      label: string;
+    },
+  ) => {
+    const msg = await getOperationQuestionList({
+      current: params.current,
+      pageSize: params.pageSize,
+      searchType: params.searchType,
+      subjectId: params.subject,
+      keyword: params.stem,
+      label: params.label,
+    });
+    console.log('[msg]', msg);
+    const { rows, total, pageTotal } = msg?.data;
+    return {
+      data: rows,
+      success: true,
+      total: total,
+      current: pageTotal,
+    };
+  };
+
   return (
     <PageContainer>
       <ProTable<QuestionAPI.QuestionItem, QuestionAPI.PageParams>
-        request={getQuestionList}
+        // request={getQuestionList}
+        request={(params) => request({ ...params, searchType: 0 })}
         columns={columns}
         actionRef={actionRef}
         rowKey="id"
