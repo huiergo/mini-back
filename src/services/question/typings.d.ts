@@ -40,4 +40,28 @@ declare namespace QuestionAPI {
       type?: string; // 反馈类型信息
     };
   };
+
+  type ILabel = {
+    id?: string;
+    name?: string;
+  };
+  type IOptStatus = {
+    code?: string;
+    name?: string;
+  };
+  type ISubject = {
+    id?: string;
+    name?: string;
+  };
+
+  type CommonOption = {
+    label?: string;
+    value?: string;
+  };
+
+  type SearchConfig = {
+    label?: ILabel[];
+    optStatus?: IOptStatus[];
+    subject?: ISubject[];
+  };
 }

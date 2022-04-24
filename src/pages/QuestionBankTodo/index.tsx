@@ -15,6 +15,9 @@ type StatusType = 'toBeHandle' | 'all' | 'handled';
 /* todo: 1. title 占位去掉 2. 宽度固定&UI样式 3.节流 */
 /* todo: 知识点检索区提供接口 */
 /* todo: 后端 subject */
+/** todo: ts报错 options={labelArr} */
+/** todo: 无效 colSize: 4, */
+/** todo: 排序 */
 
 const QuestionManager: React.FC = (props) => {
   const [currentRow, setCurrentRow] = useState<QuestionAPI.QuestionItem>();

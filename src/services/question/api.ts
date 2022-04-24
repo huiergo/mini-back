@@ -26,8 +26,8 @@ export async function getQuestionManagerList(
     current?: number;
     pageSize?: number;
     searchType?: number;
-    subject?: string;
-    stem?: string;
+    subjectId?: string;
+    keyword?: string;
     label?: string;
   },
   options?: {
@@ -41,7 +41,7 @@ export async function getQuestionManagerList(
     ...(options || {}),
   });
 }
-
+// 删除、无需优化
 export async function deleteQuestion(
   params: {
     current?: number;
@@ -60,4 +60,10 @@ export async function deleteQuestion(
     },
     ...(options || {}),
   });
+}
+
+// /operation/question/search
+// 查询条件包括知识点，状态、学科
+export async function getSearchConfig() {
+  return request<QuestionAPI.SearchConfig>('/operation/question/search');
 }

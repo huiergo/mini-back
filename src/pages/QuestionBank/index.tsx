@@ -6,7 +6,7 @@ import ProTable from '@ant-design/pro-table';
 import type { ProColumns, ActionType } from '@ant-design/pro-table';
 import ProForm, { ProFormSelect, QueryFilter, ProFormText } from '@ant-design/pro-form';
 import type { ProFormInstance } from '@ant-design/pro-form';
-import { getQuestionManagerList, deleteQuestion } from '@/services/question/api';
+import { getQuestionManagerList, deleteQuestion, getSearchConfig } from '@/services/question/api';
 import Unhandle from './Unhandle';
 import styles from './index.less';
 
@@ -20,6 +20,46 @@ const QuestionManager: React.FC = (props) => {
   const [stem, setStem] = useState<string>();
   const [label, setLabel] = useState<string>();
   const actionRef = useRef<ActionType>();
+
+  const [subjectArr, setSubjectArr] = useState<QuestionAPI.CommonOption[]>();
+  const [labelArr, setLabelArr] = useState<QuestionAPI.CommonOption[]>();
+  const [optStatusArr, setOptStatusArr] = useState<QuestionAPI.CommonOption[]>();
+
+  const queryFormRef = useRef<
+    ProFormInstance<{
+      subject: string;
+      stem: string;
+      label: string;
+    }>
+  >();
+
+  useEffect(() => {
+    getSearchConfig().then((res) => {
+      let result = res?.data;
+      let subjectTempArr = result.subject.map((i: QuestionAPI.ISubject) => {
+        return {
+          label: i?.name,
+          value: i?.id,
+        };
+      });
+      let labelTempArr = result.label.map((i: QuestionAPI.ILabel) => {
+        return {
+          label: i?.name,
+          value: i?.id,
+        };
+      });
+      let optStatusTempArr = result.optStatus.map((i: QuestionAPI.IOptStatus) => {
+        return {
+          label: i?.name,
+          value: i?.code,
+        };
+      });
+
+      setSubjectArr(subjectTempArr);
+      setLabelArr(labelTempArr);
+      setOptStatusArr(optStatusTempArr);
+    });
+  }, []);
 
   const deleteItem = async (record: QuestionAPI.ManagerQuestionItem, type: number) => {
     let loadingText = type == 0 ? '处理中' : '正在删除';
@@ -50,13 +90,12 @@ const QuestionManager: React.FC = (props) => {
       label: string;
     },
   ) => {
-    console.log('[request params]', params);
     const msg = await getQuestionManagerList({
       current: params.current,
       pageSize: params.pageSize,
       searchType: params.searchType,
-      subject: params.subject,
-      stem: params.stem,
+      subjectId: params.subject,
+      keyword: params.stem,
       label: params.label,
     });
     const { rows, total, pageTotal } = msg?.data;
@@ -68,14 +107,6 @@ const QuestionManager: React.FC = (props) => {
     };
   };
 
-  const queryFormRef = useRef<
-    ProFormInstance<{
-      subject: string;
-      stem: string;
-      label: string;
-    }>
-  >();
-
   const columns: ProColumns<QuestionAPI.ManagerQuestionItem>[] = [
     {
       dataIndex: 'questionNo',
@@ -85,6 +116,7 @@ const QuestionManager: React.FC = (props) => {
       dataIndex: 'stem',
       title: <FormattedMessage id="pages.questionTable.title" defaultMessage="stem" />,
       ellipsis: true,
+
       render: (dom, record) => {
         return <a>{record?.stem}</a>;
       },
@@ -102,15 +134,15 @@ const QuestionManager: React.FC = (props) => {
         return <>{dom + ';'}</>;
       },
     },
+
     {
       title: <FormattedMessage id="pages.questionTable.checkStatus" defaultMessage="stateValue" />,
       dataIndex: 'stateValue',
       initialValue: 0,
       hideInDescriptions: true,
       valueEnum: {
-        0: { text: '全部', status: 0 },
-        1: { text: '是', status: 1 },
-        2: { text: '否', status: 2 },
+        0: { text: '待优化', status: 'Error' },
+        1: { text: '已优化', status: 'Default' },
       },
     },
     {
@@ -178,19 +210,15 @@ const QuestionManager: React.FC = (props) => {
               colProps={{ xl: 12, md: 12 }}
               name="subject"
               placeholder="移动web与前端"
-              valueEnum={{
-                1: '移动web与前端',
-              }}
+              // valueEnum={{ '220000198603204107': '候' }}
+              options={subjectArr}
             />
             <ProFormSelect
               width="md"
               placeholder="知识点"
               colProps={{ xl: 12, md: 12 }}
               name="label"
-              valueEnum={{
-                1: 'JS',
-                2: 'Css',
-              }}
+              options={labelArr}
             />
             <Input.Search
               width="md"
