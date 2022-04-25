@@ -1,6 +1,6 @@
 declare namespace QuestionAPI {
   type QuestionItem = {
-    id?: string;
+    id?: string | number;
     questionNo?: string;
     title?: string;
     answer?: string;
@@ -13,6 +13,8 @@ declare namespace QuestionAPI {
     subjects?: string[]; //学科
     stem?: string;
     label?: string;
+    state?: string; //处理状态（已处理和未处理）
+    optStatus?: string;
   };
 
   type PageParams = {
@@ -21,10 +23,11 @@ declare namespace QuestionAPI {
     subject?: string;
     stem?: string;
     label?: string;
+    optStatus?: string;
   };
 
   type ManagerQuestionItem = {
-    id?: string; //主键id
+    id?: string | number; //主键id
     questionNo?: string; //试题编号
     questionId?: string; //试题id
     label?: string; // 知识点

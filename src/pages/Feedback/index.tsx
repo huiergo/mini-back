@@ -1,19 +1,21 @@
+import React, { useRef } from 'react';
 import { PageContainer } from '@ant-design/pro-layout';
 import ProTable from '@ant-design/pro-table';
-import React from 'react';
 import { FormattedMessage } from 'umi';
-import { getFeedback } from '@/services/feedback/api';
+import { getFeedback, dealFeedback } from '@/services/feedback/api';
 import type { ProColumns, ActionType } from '@ant-design/pro-table';
 import { Button, Divider, Drawer, message } from 'antd';
+import { history } from 'umi';
 
 const Feedback: React.FC = () => {
+  const actionRef = useRef<ActionType>();
   const columns: ProColumns<FeedbackApi.FeedbackItem>[] = [
     {
-      dataIndex: 'feedTime',
+      dataIndex: 'createdAt',
       title: <FormattedMessage id="pages.feedbackTable.feedTime" defaultMessage="feedTime" />,
     },
     {
-      dataIndex: 'feedCategory',
+      dataIndex: 'type',
       title: (
         <FormattedMessage id="pages.feedbackTable.feedCategory" defaultMessage="feedCategory" />
       ),
@@ -23,22 +25,22 @@ const Feedback: React.FC = () => {
       title: <FormattedMessage id="pages.questionTable.questionNo" defaultMessage="questionNo" />,
     },
     {
-      dataIndex: 'title',
+      dataIndex: 'stem',
       title: <FormattedMessage id="pages.questionTable.title" defaultMessage="title" />,
       ellipsis: true,
     },
     {
-      dataIndex: 'feedAdvice',
+      dataIndex: 'feedbackInfo',
       title: <FormattedMessage id="pages.feedbackTable.feedAdvice" defaultMessage="feedAdvice" />,
     },
     {
-      dataIndex: 'feedStatus',
+      dataIndex: 'state',
       title: <FormattedMessage id="pages.feedbackTable.feedStatus" defaultMessage="feedStatus" />,
       initialValue: 0,
       hideInDescriptions: true,
       valueEnum: {
-        0: { text: '否', status: 0 },
-        1: { text: '是', status: 1 },
+        0: { text: '未处理', status: 0 },
+        1: { text: '已完成', status: 1 },
       },
     },
 
@@ -53,28 +55,56 @@ const Feedback: React.FC = () => {
             onClick={() => {
               // handleUpdateModalVisible(true);
               // setStepFormValues(record);
+              history.push(`/content/question?id=${record?.id}`);
             }}
           >
             定位到题目
           </a>
           <Divider type="vertical" />
           <a
-            onClick={() => {
+            style={{ color: record?.state === '1' ? '#C3C3C5' : '#2278FF' }}
+            onClick={async () => {
+              const {
+                data: { id },
+              } = record?.state === '0' && (await dealFeedback({ id: record?.id }));
+              id && actionRef.current?.reload?.();
               // setCurrentRow(record);
               // handleModalVisible(true);
             }}
           >
-            处理
+            {record?.state === '1' ? '已处理' : '处理'}
           </a>
         </>
       ),
     },
   ];
+
+  const request = async (
+    params: T & {
+      pageSize: number;
+      current: number;
+    },
+  ) => {
+    const msg = await getFeedback({
+      current: params.current,
+      pageSize: params.pageSize,
+    });
+    console.log('[getFeedback]', msg);
+    const { rows, total, pageTotal } = msg?.data;
+    return {
+      data: rows,
+      success: true,
+      total: total,
+      current: pageTotal,
+    };
+  };
+
   return (
     <PageContainer>
       <ProTable<FeedbackApi.FeedbackItem>
+        actionRef={actionRef}
         rowKey="id"
-        request={getFeedback}
+        request={request}
         columns={columns}
         search={false}
       ></ProTable>

@@ -1,0 +1,74 @@
+@root-entry-name: 'default';
+@import (reference) '~antd/es/style/themes/index.less';
+
+.manager {
+  :global {
+    .ant-pro-list-row-title {
+      display: block !important;
+    }
+    .ant-pro-list-row-header-title {
+      display: block !important;
+    }
+    .ant-list-item-extra {
+      overflow-y: scroll;
+    }
+    .ant-pro-form-group-container {
+      gap: 0 16px !important;
+    }
+    .ant-pro-form-group-title {
+      margin-right: 0 !important;
+    }
+  }
+}
+
+.selfTrigger {
+  margin-left: 12px;
+}
+
+.hiddenFilter {
+  .filter {
+    height: 0;
+  }
+  :global {
+    .ant-tabs-top > .ant-tabs-nav {
+      margin-bottom: 0;
+    }
+  }
+}
+
+.filter {
+  overflow: hidden;
+}
+
+.quickSearch {
+  display: inline-block;
+  line-height: 40px;
+  span {
+    margin-left: 16px;
+    color: #999;
+    cursor: pointer;
+    &:hover {
+      opacity: 0.85;
+    }
+  }
+}
+
+.tagWrapper {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.tag {
+  margin-right: 10px;
+  margin-bottom: 10px;
+  padding: 0 10px;
+  color: #3c3e42;
+  font-size: 12px;
+  word-wrap: break-word;
+  word-break: break-all;
+  background-color: #f6f7f9;
+  border: 1px solid #ededed;
+  border-radius: 2px;
+}

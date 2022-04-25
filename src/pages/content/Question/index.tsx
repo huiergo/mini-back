@@ -1,20 +1,27 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { FormattedMessage } from 'umi';
-import { Button, Divider, Drawer, message } from 'antd';
+import { Button, Divider, Drawer, message, Input, Card } from 'antd';
 import { PageContainer } from '@ant-design/pro-layout';
 import ProTable from '@ant-design/pro-table';
-import { getOperationQuestionList } from '@/services/content/question/api';
-// 针对formRef的使用: getFieldsValue ,getFieldsError,resetFields,setFields,validateFields,submit
 import {
+  deleteQuestion,
+  getOperationQuestionList,
+  pushQuestion,
+  submitEditInfo,
+  getSearchConfig,
+} from '@/services/content/question/api';
+import ProForm, {
   ModalForm,
   ProFormInstance,
   ProFormText,
   ProFormSelect,
   ProFormTextArea,
+  QueryFilter,
 } from '@ant-design/pro-form';
 import type { ProColumns, ActionType } from '@ant-design/pro-table';
 import ProDescriptions from '@ant-design/pro-descriptions';
-import { PlusOutlined } from '@ant-design/icons';
+import { history } from 'umi';
+import styles from './index.less';
 
 const waitTime = (timeout = 2000) => {
   return new Promise((resolve) => {
@@ -24,18 +31,95 @@ const waitTime = (timeout = 2000) => {
   });
 };
 
+const handleLabelToString = (arr) => {
+  return arr.reduce((total, cur) => {
+    return (total += cur.name);
+  }, '');
+};
+
 const Question: React.FC = () => {
   const actionRef = useRef<ActionType>();
   const ref = useRef<ProFormInstance>();
   const [modalVisible, handleModalVisible] = useState<boolean>(false);
   const [drawerVisible, handleDrawerVisible] = useState<boolean>(false);
 
+  const [subject, setSubject] = useState<string>();
+  const [stem, setStem] = useState<string>();
+  const [label, setLabel] = useState<string>();
+  const [optStatus, setOptStatus] = useState<string>();
+  const [subjectArr, setSubjectArr] = useState<QuestionAPI.CommonOption[]>();
+  const [labelArr, setLabelArr] = useState<QuestionAPI.CommonOption[]>();
+  const [optStatusArr, setOptStatusArr] = useState<QuestionAPI.CommonOption[]>();
+  const queryFormRef = useRef<
+    ProFormInstance<{
+      subject: string;
+      stem: string;
+      label: string;
+      optStatus: string;
+    }>
+  >();
+
+  const inputRef = useRef<any>(null);
+
+  const [inputValue, setInputValue] = useState('');
+
+  const changeLabelTags = (list) => {
+    //todo: 表单提交的 时候 能够带上
+
+    let result = labelArr.filter((item) => {
+      return list.indexOf(item.value) > -1;
+    });
+    console.log('[result111]', result);
+    let temp = result.map((item) => {
+      return {
+        id: item.value,
+        name: item.label,
+      };
+    });
+    console.log('[temp111]', temp);
+
+    return temp;
+  };
+  useEffect(() => {
+    console.log('[history]', history.location.query);
+    setInputValue(history.location.query?.id);
+    setStem(history.location.query?.id);
+  }, [history.location.query]);
+
+  useEffect(() => {
+    getSearchConfig().then((res) => {
+      let result = res?.data;
+      let subjectTempArr = result.subject.map((i: QuestionAPI.ISubject) => {
+        return {
+          label: i?.name,
+          value: i?.id,
+        };
+      });
+      let labelTempArr = result.label.map((i: QuestionAPI.ILabel) => {
+        return {
+          label: i?.name,
+          value: i?.id,
+        };
+      });
+      let optStatusTempArr = result.optStatus.map((i: QuestionAPI.IOptStatus) => {
+        return {
+          label: i?.name,
+          value: i?.code,
+        };
+      });
+
+      setSubjectArr(subjectTempArr);
+      setLabelArr(labelTempArr);
+      setOptStatusArr(optStatusTempArr);
+    });
+  }, []);
   const [currentRow, setCurrentRow] = useState<QuestionAPI.QuestionItem>();
   const columns: ProColumns<QuestionAPI.QuestionItem>[] = [
     {
       dataIndex: 'subjects',
-      title: <FormattedMessage id="pages.questionTable.questionNo" defaultMessage="questionNo" />,
+      title: <FormattedMessage id="pages.questionTable.subjects" defaultMessage="subjects" />,
       initialValue: 'all',
+      hideInSearch: true,
       hideInTable: true,
       hideInForm: true,
       hideInDescriptions: true,
@@ -47,22 +131,25 @@ const Question: React.FC = () => {
     {
       dataIndex: 'questionNo',
       title: <FormattedMessage id="pages.questionTable.questionNo" defaultMessage="questionNo" />,
+      hideInForm: true,
+      hideInSearch: true,
     },
     {
       dataIndex: 'stem',
       title: <FormattedMessage id="pages.questionTable.title" defaultMessage="title" />,
       ellipsis: true,
+      hideInSearch: true,
       render: (dom, record) => {
         return (
           <a
             onClick={() => {
               setCurrentRow(record);
               handleDrawerVisible(true);
+              handleModalVisible(true);
               console.log('打开抽屉Modal', record);
             }}
           >
             {record?.stem}
-            {/* {dom} */}
           </a>
         );
       },
@@ -75,11 +162,10 @@ const Question: React.FC = () => {
     },
     {
       title: <FormattedMessage id="pages.questionTable.tags" defaultMessage="tags" />,
-      dataIndex: 'tags',
+      dataIndex: 'label',
+      hideInSearch: true,
       render: (dom, record) => {
-        console.log('[tags]', dom, record);
-
-        return <>{record?.label}</>;
+        return <>{handleLabelToString(record?.label)}</>;
       },
     },
     {
@@ -96,8 +182,9 @@ const Question: React.FC = () => {
     },
     {
       title: <FormattedMessage id="pages.questionTable.checkStatus" defaultMessage="checkStatus" />,
-      dataIndex: 'state',
+      dataIndex: 'optStatus',
       initialValue: 0,
+      hideInSearch: true,
       hideInDescriptions: true,
       valueEnum: {
         0: { text: '待优化', status: 0 },
@@ -110,7 +197,6 @@ const Question: React.FC = () => {
       hideInSearch: true,
       hideInDescriptions: true,
       render: (dom, record) => {
-        console.log('[owner]', dom, record);
         return <>{record?.updator} </>;
       },
     },
@@ -128,9 +214,10 @@ const Question: React.FC = () => {
       render: (_, record) => (
         <>
           <a
-            onClick={() => {
+            onClick={async () => {
               // handleUpdateModalVisible(true);
-              // setStepFormValues(record);
+              const { data } = await pushQuestion({ id: record?.id });
+              data && data.id && message.success('推送成功');
             }}
           >
             推送
@@ -139,13 +226,22 @@ const Question: React.FC = () => {
           <a
             onClick={() => {
               setCurrentRow(record);
+              handleDrawerVisible(false);
               handleModalVisible(true);
             }}
           >
             修改知识点
           </a>
           <Divider type="vertical" />
-          <a href="">删除</a>
+          <a
+            onClick={async () => {
+              // handleUpdateModalVisible(true);
+              const { data } = await deleteQuestion({ id: record?.id, type: 1 });
+              data && data.id && message.success('删除成功');
+            }}
+          >
+            删除
+          </a>
         </>
       ),
     },
@@ -158,6 +254,7 @@ const Question: React.FC = () => {
       subject: string;
       stem: string;
       label: string;
+      optStatus: string;
     },
   ) => {
     const msg = await getOperationQuestionList({
@@ -167,8 +264,8 @@ const Question: React.FC = () => {
       subjectId: params.subject,
       keyword: params.stem,
       label: params.label,
+      optStatus: params.optStatus,
     });
-    console.log('[msg]', msg);
     const { rows, total, pageTotal } = msg?.data;
     return {
       data: rows,
@@ -179,72 +276,82 @@ const Question: React.FC = () => {
   };
 
   return (
-    <PageContainer>
-      <ProTable<QuestionAPI.QuestionItem, QuestionAPI.PageParams>
-        // request={getQuestionList}
-        request={(params) => request({ ...params, searchType: 0 })}
-        columns={columns}
-        actionRef={actionRef}
-        rowKey="id"
-        formRef={ref}
-        toolBarRender={() => [
-          <Button
-            key="set"
-            onClick={() => {
-              if (ref.current) {
-                ref.current.setFieldsValue({
-                  title: 'test-xxx',
-                });
-              }
-            }}
-          >
-            赋值
-          </Button>,
-          <Button
-            key="submit"
-            onClick={() => {
-              if (ref.current) {
-                ref.current.resetFields();
-              }
-            }}
-          >
-            重置
-          </Button>,
-        ]}
-        onRequestError={(error) => console.log('[请求失败]', error)}
-        options={false}
-        onSubmit={(params) => {
-          console.log('[onSubmit]', params);
-        }}
-        onReset={() => console.log('[onReset]')}
-      ></ProTable>
-
-      <Drawer
-        width={600}
-        visible={drawerVisible}
-        onClose={() => {
-          setCurrentRow(undefined);
-          handleDrawerVisible(false);
-        }}
-        closable={false}
-      >
-        {currentRow?.questionNo && (
-          <ProDescriptions<QuestionAPI.QuestionItem>
-            column={1}
-            title="题目详情"
-            request={async () => ({
-              data: currentRow || {},
-            })}
-            // params={{
-            //   id: row?._id,
-            // }}
-            columns={columns}
-          />
-        )}
-      </Drawer>
+    <PageContainer className={styles.manager}>
+      <div style={{ background: '#fff', padding: 32, paddingBottom: 0 }}>
+        <QueryFilter
+          submitter={false}
+          span={24}
+          labelWidth="auto"
+          split
+          autoFocusFirstInput={false}
+          className={styles.filter}
+          formRef={queryFormRef}
+          onValuesChange={async () => {
+            queryFormRef.current?.validateFieldsReturnFormatValue?.().then((val) => {
+              setSubject(val.subject);
+              setLabel(val.label);
+              setOptStatus(val.optStatus);
+              console.log('[onValuesChange]', val);
+            });
+          }}
+        >
+          <ProForm.Group title=" ">
+            <ProFormSelect
+              width="md"
+              colProps={{ xl: 12, md: 12 }}
+              name="subject"
+              placeholder="移动web与前端"
+              // valueEnum={{ '220000198603204107': '候' }}
+              options={subjectArr}
+            />
+            <ProFormSelect
+              width="md"
+              placeholder="知识点"
+              colProps={{ xl: 12, md: 12 }}
+              name="label"
+              options={labelArr}
+            />
+            {/* optStatus */}
+            <ProFormSelect
+              width="md"
+              placeholder="状态"
+              colProps={{ xl: 12, md: 12 }}
+              name="optStatus"
+              options={optStatusArr}
+            />
+            <Input.Search
+              ref={inputRef}
+              value={inputValue}
+              width="md"
+              placeholder="题干关键词搜索"
+              enterButton
+              size="middle"
+              onSearch={(v) => setStem(v)}
+              style={{ maxWidth: 522, width: '100%' }}
+            />
+          </ProForm.Group>
+        </QueryFilter>
+      </div>
+      <div style={{ background: '#fff', padding: 32, paddingBottom: 0, paddingTop: 0 }}>
+        <ProTable<QuestionAPI.QuestionItem, QuestionAPI.PageParams>
+          params={{ subject, stem, label, optStatus }}
+          request={(params) => request({ ...params, searchType: 0 })}
+          columns={columns}
+          actionRef={actionRef}
+          rowKey="id"
+          formRef={ref}
+          onRequestError={(error) => console.log('[请求失败]', error)}
+          options={false}
+          onSubmit={(params) => {
+            console.log('[onSubmit]', params);
+          }}
+          toolBarRender={false}
+          search={false}
+        ></ProTable>
+      </div>
 
       <ModalForm
-        title="新建表单"
+        title="修改知识点"
         visible={modalVisible}
         onVisibleChange={handleModalVisible}
         autoFocusFirstInput
@@ -252,139 +359,47 @@ const Question: React.FC = () => {
           onCancel: () => console.log('run'),
         }}
         onFinish={async (values) => {
-          await waitTime(2000);
-          console.log('[model 提交内容]', values);
+          console.log('[values]', values.label);
+          console.log('[xxxx]', changeLabelTags(values.label));
+          const result = await submitEditInfo({
+            ...currentRow,
+            id: currentRow?.id,
+            label: changeLabelTags(values.label),
+          });
+          // 这里tags需要改为 [{id:xx,name:yyy}]
+          console.log('[model 提交内容]', result);
+          // todo : 细致化体验
           message.success('提交成功');
+          handleModalVisible(false);
+          if (actionRef.current) {
+            actionRef.current.reload();
+          }
           return true;
         }}
-        // onFinish={async (value) => {
-        //   const success = await handleAdd(value as API.RuleListItem);
-        //   if (success) {
-        //     handleModalVisible(false);
-        //     if (actionRef.current) {
-        //       actionRef.current.reload();
-        //     }
-        //   }
-        // }}
       >
-        {/* <ProDescriptions<QuestionAPI.QuestionItem>
-          column={1}
-          title={currentRow?.questionNo}
-          request={async () => ({
-            data: currentRow || {},
-          })}
-          columns={columns}
-        /> */}
-        <ProFormText
-          rules={[
-            {
-              required: true,
-              message: (
-                <FormattedMessage
-                  id="pages.searchTable.ruleName"
-                  defaultMessage="Rule name is required"
-                />
-              ),
-            },
-          ]}
-          width="md"
-          name="title"
-          readonly
-          label="题目"
-          initialValue={currentRow?.title}
-        />
-        <ProFormTextArea
-          width="md"
-          name="answer"
-          readonly
-          label="答案"
-          initialValue={currentRow?.answer}
-        />
-        <ProFormSelect
-          options={[
-            {
-              value: 'html',
-              label: 'html',
-            },
-            {
-              value: 'js',
-              label: 'js',
-            },
-            {
-              value: 'css',
-              label: 'css',
-            },
-          ]}
-          name="tags"
-          label="修改知识点"
-        />
+        <ProDescriptions style={{ background: '#F6F7F9', padding: 16 }} column={2}>
+          <ProDescriptions.Item span={2} label="题目">
+            {currentRow?.stem}
+          </ProDescriptions.Item>
+          <ProDescriptions.Item span={4} label="答案">
+            {currentRow?.answer}
+          </ProDescriptions.Item>
+          <ProDescriptions.Item label="难度" valueType="rate">
+            {currentRow?.difficulty}
+          </ProDescriptions.Item>
+        </ProDescriptions>
+        {drawerVisible && (
+          <div className={styles.tagWrapper}>
+            {labelArr.map((i) => (
+              <div className={styles.tag}>{i.label}</div>
+            ))}
+          </div>
+        )}
+        {!drawerVisible && (
+          <ProFormSelect mode="tags" options={labelArr} name="label" label="修改知识点" />
+        )}
       </ModalForm>
     </PageContainer>
   );
 };
 export default Question;
-
-//====== columns 设置
-// hideInSearch: false,
-// hideInTable: false,
-// hideInForm: false,
-// // todo: filters和onFilter的区别
-// /** 表头的筛选菜单项 */
-// filters: false,
-// /** 筛选的函数，设置为 false 会关闭自带的本地筛选 */
-// onFilter: false,
-
-// ==============
-// // params 一旦变化，会触发加载 todo: 为啥params只能是PageParams类型呢
-// params={{
-// }}
-// // 对request数据进行处理
-// postData={}
-// defaultData={}
-// // 更推荐request 返回数据
-// dataSource={}
-// // table数据发生改变时调用
-// onDataSourceChange={}
-// // Table action的引用，便于自定义触发
-
-// =========
-// // todo : 做一个请求失败的中间件
-// onRequestError={(error) => console.log('[请求失败]', error)}
-// // table 工具栏,设为 false 时不显示.传入 function 会点击时触发
-// options={false}
-// // false | SearchConfig
-// // todo : 不认识这个？
-// // search={{
-// //   filterType: 'light',
-// //   searchText: '查询文本',
-// //   span: 5,
-// // }}
-// // antd form 的配置: FormProps . 类似Form.useForm(), 和上述的ProFormInstance 一样
-// // form={}
-
-// // 提交表单时触发
-// onSubmit={(params) => {
-//   // todo ,是不需要写吧？ 直接request监听就行吧
-//   console.log('[onSubmit]', params);
-// }}
-// // 重置表单时触发   // todo ,是不需要写吧？ 直接request监听就行吧
-// onReset={() => console.log('[onReset]')}
-
-//  =====以下是 columns 相关的配置
-// //  columns={[
-// //    {
-// //       // 表头的筛选菜单项，当值为 true 时，自动使用 valueEnum 生成
-// //   filters={}
-// //   // 筛选表单，为 true 时使用 ProTable 自带的，为 false 时关闭本地筛选
-// //   onFilter={}
-// //    }
-// //  ]}
-
-// // search 配置列的搜索相关，false 为隐藏
-
-// // renderFormItem:  渲染查询表单的输入组件
-// // render
-// // renderText
-
-// // fieldProps： 查询表单的 props，会透传给表单项,如果渲染出来是 Input,就支持 input 的所有 props，同理如果是 select，也支持 select 的所有 props。也支持方法传入
-// // formItemProps： 传递给 Form.Item 的配置,可以配置 rules，但是默认的查询表单 rules 是不生效的。需要配置 ignoreRules
