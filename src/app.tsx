@@ -34,6 +34,7 @@ export async function getInitialState(): Promise<{
     if (authenticated) {
       localStorage.setItem('token', instance.token); // 将token存入本地缓存
       localStorage.setItem('user-config', JSON.stringify(instance.tokenParsed)); // 将用户信息存入本地缓存
+      console.log('用户信息', instance.tokenParsed);
       // dispatch({ type: 'user/saveCurrentUser', payload: instance.tokenParsed });
     } else {
       instance.login();
@@ -42,8 +43,10 @@ export async function getInitialState(): Promise<{
   const fetchUserInfo = async () => {
     try {
       // queryCurrentUser 入参从storage中取
-      const msg = await queryCurrentUser();
-      return msg.data;
+      // const msg = await queryCurrentUser();
+      // return msg.data;
+      const msg = localStorage.getItem('user-config');
+      return msg && JSON.parse(msg);
     } catch (error) {
       console.log('[error]', error);
       // history.push(loginPath);
@@ -152,8 +155,23 @@ const authHeaderInterceptor = (url: string, options: RequestOptionsInit) => {
     },
   };
 };
+
+const unionResponseInterceptors = (response: Response, options: RequestOptionsInit) => {
+  console.log('[demoResponse]', response, options);
+  // response.headers.append('interceptors', 'yes yo');
+  if (response.status == 401) {
+    console.log('[401]');
+    // instance.logout();
+  }
+  if (response.status == 403) {
+    console.log('[403]', response);
+  }
+  return response;
+};
+
 export const request: RequestConfig = {
   errorHandler,
   // 新增自动添加AccessToken的请求前拦截器
   requestInterceptors: [authHeaderInterceptor],
+  responseInterceptors: [unionResponseInterceptors],
 };

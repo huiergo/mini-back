@@ -8,6 +8,8 @@ import styles from './index.less';
 import { outLogin } from '@/services/ant-design-pro/api';
 import type { MenuInfo } from 'rc-menu/lib/interface';
 
+import { instance } from '@/auth';
+
 export type GlobalHeaderRightProps = {
   menu?: boolean;
 };
@@ -16,18 +18,19 @@ export type GlobalHeaderRightProps = {
  * 退出登录，并且将当前的 url 保存
  */
 const loginOut = async () => {
-  await outLogin();
-  const { query = {}, search, pathname } = history.location;
-  const { redirect } = query;
-  // Note: There may be security issues, please note
-  if (window.location.pathname !== '/user/login' && !redirect) {
-    history.replace({
-      pathname: '/user/login',
-      search: stringify({
-        redirect: pathname + search,
-      }),
-    });
-  }
+  instance.logout();
+  // await outLogin();
+  // const { query = {}, search, pathname } = history.location;
+  // const { redirect } = query;
+  // // Note: There may be security issues, please note
+  // if (window.location.pathname !== '/user/login' && !redirect) {
+  //   history.replace({
+  //     pathname: '/user/login',
+  //     search: stringify({
+  //       redirect: pathname + search,
+  //     }),
+  //   });
+  // }
 };
 
 const AvatarDropdown: React.FC<GlobalHeaderRightProps> = ({ menu }) => {
@@ -93,7 +96,12 @@ const AvatarDropdown: React.FC<GlobalHeaderRightProps> = ({ menu }) => {
   return (
     <HeaderDropdown overlay={menuHeaderDropdown}>
       <span className={`${styles.action} ${styles.account}`}>
-        <Avatar size="small" className={styles.avatar} src={currentUser.avatar} alt="avatar" />
+        <Avatar
+          size="small"
+          style={{ backgroundColor: '#94BDFF', color: '#fff', marginRight: '8px' }}
+        >
+          {currentUser.preferred_username?.substr(0, 1).toUpperCase()}
+        </Avatar>
         <span className={`${styles.name} anticon`}>{currentUser.name}</span>
       </span>
     </HeaderDropdown>
