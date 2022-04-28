@@ -34,17 +34,12 @@ export async function getInitialState(): Promise<{
     if (authenticated) {
       localStorage.setItem('token', instance.token); // 将token存入本地缓存
       localStorage.setItem('user-config', JSON.stringify(instance.tokenParsed)); // 将用户信息存入本地缓存
-      console.log('用户信息', instance.tokenParsed);
-      // dispatch({ type: 'user/saveCurrentUser', payload: instance.tokenParsed });
     } else {
       instance.login();
     }
   });
   const fetchUserInfo = async () => {
     try {
-      // queryCurrentUser 入参从storage中取
-      // const msg = await queryCurrentUser();
-      // return msg.data;
       const msg = localStorage.getItem('user-config');
       return msg && JSON.parse(msg);
     } catch (error) {
@@ -81,20 +76,9 @@ export const layout: RunTimeLayoutConfig = ({ initialState, setInitialState }) =
     onPageChange: () => {
       const { location } = history;
       console.log('[onPageChange]', location);
-      // instance.init({ 'login-required': true }).then((authenticated: boolean) => {
-      //   console.log('[authenticated]', authenticated);
-      //   if (authenticated) {
-      //     localStorage.setItem('token', instance.token); // 将token存入本地缓存
-      //     localStorage.setItem('user-config', JSON.stringify(instance.tokenParsed)); // 将用户信息存入本地缓存
-      //     // dispatch({ type: 'user/saveCurrentUser', payload: instance.tokenParsed });
-      //   } else {
-      //     instance.login();
-      //   }
-      // });
-      // 如果没有登录，重定向到 login
-      // if (!initialState?.currentUser && location.pathname !== loginPath) {
-      //   history.push(loginPath);
-      // }
+      if (!instance.authenticated) {
+        instance.logout();
+      }
     },
     links: isDev
       ? [
@@ -158,10 +142,9 @@ const authHeaderInterceptor = (url: string, options: RequestOptionsInit) => {
 
 const unionResponseInterceptors = (response: Response, options: RequestOptionsInit) => {
   console.log('[demoResponse]', response, options);
-  // response.headers.append('interceptors', 'yes yo');
   if (response.status == 401) {
-    console.log('[401]');
-    // instance.logout();
+    //  todo : auth 入参 refresh_token: undefined
+    instance.logout();
   }
   if (response.status == 403) {
     console.log('[403]', response);
