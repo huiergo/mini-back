@@ -1,7 +1,8 @@
+import { Button, Result } from 'antd';
 import React from 'react';
+import { history } from 'umi';
+import { instance } from '@/auth';
 
-function Interview() {
-  return <div>Interview</div>;
-}
+const NoFoundPage: React.FC = () => <Result status="404" title="敬请期待~" />;
 
-export default Interview;
+export default NoFoundPage;
