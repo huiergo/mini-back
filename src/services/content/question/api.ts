@@ -18,7 +18,9 @@ export async function getOperationQuestionList(
     [key: string]: any;
   },
 ) {
-  return request<QuestionAPI.ManagerQuestionItem>('/operation/question', {
+  // /operation/question
+  // /wxManagement/question/list
+  return request<QuestionAPI.ManagerQuestionItem>('/wxManagement/question/list', {
     params: {
       ...params,
     },

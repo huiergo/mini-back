@@ -76,9 +76,6 @@ export const layout: RunTimeLayoutConfig = ({ initialState, setInitialState }) =
     onPageChange: () => {
       const { location } = history;
       console.log('[onPageChange]', location);
-      if (!instance.authenticated) {
-        instance.logout();
-      }
     },
     links: isDev
       ? [
@@ -146,8 +143,11 @@ const unionResponseInterceptors = (response: Response, options: RequestOptionsIn
     //  todo : auth 入参 refresh_token: undefined
     instance.logout();
   }
+  // todo: 这两个状态码，要测试一下，
   if (response.status == 403) {
-    console.log('[403]', response);
+    history.replace({
+      pathname: '/403',
+    });
   }
   return response;
 };

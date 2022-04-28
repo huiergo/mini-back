@@ -85,6 +85,7 @@
     redirect: '/content',
   },
   {
-    component: './404',
+    path: '/403',
+    component: './403',
   },
 ];

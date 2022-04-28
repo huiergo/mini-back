@@ -36,19 +36,19 @@ const QuestionManager: React.FC = (props) => {
   useEffect(() => {
     getSearchConfig().then((res) => {
       let result = res?.data;
-      let subjectTempArr = result.subject.map((i: QuestionAPI.ISubject) => {
+      let subjectTempArr = result?.subject?.map((i: QuestionAPI.ISubject) => {
         return {
           label: i?.name,
           value: i?.id,
         };
       });
-      let labelTempArr = result.label.map((i: QuestionAPI.ILabel) => {
+      let labelTempArr = result?.label?.map((i: QuestionAPI.ILabel) => {
         return {
           label: i?.name,
           value: i?.id,
         };
       });
-      let optStatusTempArr = result.optStatus.map((i: QuestionAPI.IOptStatus) => {
+      let optStatusTempArr = result?.optStatus?.map((i: QuestionAPI.IOptStatus) => {
         return {
           label: i?.name,
           value: i?.code,
