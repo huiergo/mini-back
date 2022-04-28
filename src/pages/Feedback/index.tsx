@@ -62,17 +62,15 @@ const Feedback: React.FC = () => {
           </a>
           <Divider type="vertical" />
           <a
-            style={{ color: record?.state === '1' ? '#C3C3C5' : '#2278FF' }}
+            style={{ color: record?.state === 1 ? '#C3C3C5' : '#2278FF' }}
             onClick={async () => {
-              const {
-                data: { id },
-              } = record?.state === '0' && (await dealFeedback({ id: record?.id }));
-              id && actionRef.current?.reload?.();
-              // setCurrentRow(record);
-              // handleModalVisible(true);
+              if (record?.state == 0) {
+                let result = await dealFeedback({ id: record?.id });
+                result?.data?.id && actionRef.current?.reload?.();
+              }
             }}
           >
-            {record?.state === '1' ? '已处理' : '处理'}
+            {record?.state === 1 ? '已处理' : '处理'}
           </a>
         </>
       ),

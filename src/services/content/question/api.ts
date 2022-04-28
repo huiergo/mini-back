@@ -20,7 +20,7 @@ export async function getOperationQuestionList(
 ) {
   // /operation/question
   // /wxManagement/question/list
-  return request<QuestionAPI.ManagerQuestionItem>('/wxManagement/question/list', {
+  return request<QuestionAPI.ManagerQuestionItem>('/operation/question', {
     params: {
       ...params,
     },

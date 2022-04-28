@@ -13,7 +13,7 @@ declare namespace QuestionAPI {
     subjects?: string[]; //学科
     stem?: string;
     label?: string;
-    state?: string; //处理状态（已处理和未处理）
+    state?: string | number; //处理状态（已处理和未处理）
     optStatus?: string;
   };
 
