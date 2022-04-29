@@ -24,14 +24,6 @@ import MarkWidget from '@/components/MarkWidget';
 import { history } from 'umi';
 import styles from './index.less';
 
-const waitTime = (timeout = 2000) => {
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      resolve(true);
-    }, timeout);
-  });
-};
-
 const handleLabelToString = (arr) => {
   return arr.reduce((total, cur) => {
     return (total += cur.name + '；');
