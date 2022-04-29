@@ -3,7 +3,7 @@
     path: '/content',
     name: 'content',
     icon: 'crown',
-    access: 'canAdmin', // todo
+    access: 'canAdmin',
     routes: [
       {
         path: '/content/question',

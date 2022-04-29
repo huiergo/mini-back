@@ -1,10 +1,6 @@
 // @ts-ignore
 /* eslint-disable */
 import { request } from 'umi';
-
-// todo: account接口，返回权限admin鉴权
-// todo: 后端返回格式不同，怎么adaptor兼容， 错误中间件处理配置
-
 export async function getOperationQuestionList(
   params: {
     current?: number;
@@ -21,8 +17,6 @@ export async function getOperationQuestionList(
     [key: string]: any;
   },
 ) {
-  // /operation/question
-  // /wxManagement/question/list
   return request<QuestionAPI.ManagerQuestionItem>('/operation/question', {
     params: {
       ...params,
@@ -33,10 +27,6 @@ export async function getOperationQuestionList(
 
 // 后台-编辑试题提交
 export async function submitEditInfo(
-  // params: QuestionAPI.QuestionItem,
-  // params: {
-  //   username: string;
-  // },
   body: QuestionAPI.QuestionItem,
   options?: {
     [key: string]: any;
@@ -44,9 +34,6 @@ export async function submitEditInfo(
 ) {
   return request<QuestionAPI.ManagerQuestionItem>('/wxManagement/question/edit', {
     method: 'put',
-    // params: {
-    //   ...params,
-    // },
     data: body,
     ...(options || {}),
   });

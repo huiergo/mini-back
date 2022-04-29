@@ -60,8 +60,6 @@ const Question: React.FC = () => {
   const [inputValue, setInputValue] = useState('');
 
   const changeLabelTags = (list) => {
-    //todo: 表单提交的 时候 能够带上
-
     let result = labelArr.filter((item) => {
       return list.indexOf(item.value) > -1;
     });
@@ -116,7 +114,6 @@ const Question: React.FC = () => {
       hideInTable: true,
       hideInForm: true,
       hideInDescriptions: true,
-      // todo: valueEnum
       valueEnum: {
         all: { text: '前端学科', status: 0 },
       },

@@ -44,7 +44,6 @@ export async function getInitialState(): Promise<{
     }
     return undefined;
   };
-  // 如果不是登录页面，执行
   if (history.location.pathname !== loginPath) {
     const currentUser = await fetchUserInfo();
     return {
@@ -70,11 +69,7 @@ export const layout: RunTimeLayoutConfig = ({ initialState, setInitialState }) =
     footerRender: () => <Footer />,
     onPageChange: () => {},
     menuHeaderRender: undefined,
-    // 自定义 403 页面
-    // unAccessible: <div>unAccessible</div>,
-    // 增加一个 loading 的状态
     childrenRender: (children, props) => {
-      // if (initialState?.loading) return <PageLoading />;
       return (
         <>
           {children}
@@ -119,10 +114,8 @@ const authHeaderInterceptor = (url: string, options: RequestOptionsInit) => {
 
 const unionResponseInterceptors = (response: Response, options: RequestOptionsInit) => {
   if (response.status == 401) {
-    //  todo : auth 入参 refresh_token: undefined
     instance.logout();
   }
-  // todo: 这两个状态码，要测试一下，
   if (response.status == 403) {
     history.replace({
       pathname: '/403',
@@ -133,7 +126,6 @@ const unionResponseInterceptors = (response: Response, options: RequestOptionsIn
 
 export const request: RequestConfig = {
   errorHandler,
-  // 新增自动添加AccessToken的请求前拦截器
   requestInterceptors: [authHeaderInterceptor],
   responseInterceptors: [unionResponseInterceptors],
 };
