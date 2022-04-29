@@ -230,49 +230,63 @@ const Question: React.FC = () => {
       hideInDescriptions: true,
       width: 200,
       fixed: 'right',
-      render: (_, record) => (
-        <>
-          <a
-            onClick={async () => {
-              // handleUpdateModalVisible(true);
-              const { data } = await pushQuestion({ id: record?.id });
-              if (data?.id) {
-                message.success('推送成功');
-                actionRef.current?.reload();
-              }
-            }}
-          >
-            推送
-          </a>
-          <Divider type="vertical" />
-          <a
-            onClick={() => {
-              setCurrentRow(record);
-              handleDrawerVisible(false);
-              handleModalVisible(true);
-            }}
-          >
-            修改知识点
-          </a>
-          <Divider type="vertical" />
-          <a
-            onClick={async () => {
-              // handleUpdateModalVisible(true);
-              try {
-                const { data } = await deleteQuestion({ id: record?.id, type: 1 });
-                if (data?.id) {
-                  message.success('删除成功');
-                  actionRef.current?.reload();
-                }
-              } catch (error) {
-                message.error('删除失败');
-              }
-            }}
-          >
-            删除
-          </a>
-        </>
-      ),
+      render: (_, record) => {
+        if (record.optStatus === 0) {
+          return (
+            <div>
+              <a style={{ color: '#D9DBDE', cursor: 'default' }}>推送</a>
+              <Divider type="vertical" />
+              <a style={{ color: '#D9DBDE', cursor: 'default' }}>修改知识点</a>
+              <Divider type="vertical" />
+              <a style={{ color: '#D9DBDE', cursor: 'default' }}>删除</a>
+            </div>
+          );
+        } else {
+          return (
+            <>
+              <a
+                onClick={async () => {
+                  // handleUpdateModalVisible(true);
+                  const { data } = await pushQuestion({ id: record?.id });
+                  if (data?.id) {
+                    message.success('推送成功');
+                    actionRef.current?.reload();
+                  }
+                }}
+              >
+                推送
+              </a>
+              <Divider type="vertical" />
+              <a
+                onClick={() => {
+                  setCurrentRow(record);
+                  handleDrawerVisible(false);
+                  handleModalVisible(true);
+                }}
+              >
+                修改知识点
+              </a>
+              <Divider type="vertical" />
+              <a
+                onClick={async () => {
+                  // handleUpdateModalVisible(true);
+                  try {
+                    const { data } = await deleteQuestion({ id: record?.id, type: 1 });
+                    if (data?.id) {
+                      message.success('删除成功');
+                      actionRef.current?.reload();
+                    }
+                  } catch (error) {
+                    message.error('删除失败');
+                  }
+                }}
+              >
+                删除
+              </a>
+            </>
+          );
+        }
+      },
     },
   ];
 
