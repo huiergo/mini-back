@@ -13,6 +13,9 @@ export async function getOperationQuestionList(
     subjectId?: string;
     keyword?: string;
     label?: string;
+    optStatus?: string; //优化状态
+    order?: string; //  likeCount,views,updatedAt 不传值，默认是updatedAt,倒序查询
+    orderMethod?: string; //   值asc正序，desc倒序，不传值，默认是desc,(order字段传值才有效)
   },
   options?: {
     [key: string]: any;

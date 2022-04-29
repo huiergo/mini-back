@@ -20,6 +20,7 @@ import ProForm, {
 } from '@ant-design/pro-form';
 import type { ProColumns, ActionType } from '@ant-design/pro-table';
 import ProDescriptions from '@ant-design/pro-descriptions';
+import MarkWidget from '@/components/MarkWidget';
 import { history } from 'umi';
 import styles from './index.less';
 
@@ -33,7 +34,7 @@ const waitTime = (timeout = 2000) => {
 
 const handleLabelToString = (arr) => {
   return arr.reduce((total, cur) => {
-    return (total += cur.name);
+    return (total += cur.name + '；');
   }, '');
 };
 
@@ -47,6 +48,9 @@ const Question: React.FC = () => {
   const [stem, setStem] = useState<string>();
   const [label, setLabel] = useState<string>();
   const [optStatus, setOptStatus] = useState<string>();
+  const [order, setOrder] = useState<string>();
+  const [orderMethod, setOrderMethod] = useState<string>();
+
   const [subjectArr, setSubjectArr] = useState<QuestionAPI.CommonOption[]>();
   const [labelArr, setLabelArr] = useState<QuestionAPI.CommonOption[]>();
   const [optStatusArr, setOptStatusArr] = useState<QuestionAPI.CommonOption[]>();
@@ -130,16 +134,20 @@ const Question: React.FC = () => {
     },
     {
       dataIndex: 'questionNo',
+      width: 100,
       title: <FormattedMessage id="pages.questionTable.questionNo" defaultMessage="questionNo" />,
       hideInForm: true,
       hideInSearch: true,
     },
     {
       dataIndex: 'stem',
+      width: 250,
       title: <FormattedMessage id="pages.questionTable.title" defaultMessage="title" />,
       ellipsis: true,
       hideInSearch: true,
       render: (dom, record) => {
+        const temp = record?.stem?.replace(/<[^>]+>/g, ''); // html是一个要去除html标记的文档
+
         return (
           <a
             onClick={() => {
@@ -148,8 +156,9 @@ const Question: React.FC = () => {
               handleModalVisible(true);
               console.log('打开抽屉Modal', record);
             }}
+            style={{ overflow: 'hidden' }}
           >
-            {record?.stem}
+            {temp}
           </a>
         );
       },
@@ -164,6 +173,7 @@ const Question: React.FC = () => {
       title: <FormattedMessage id="pages.questionTable.tags" defaultMessage="tags" />,
       dataIndex: 'label',
       hideInSearch: true,
+      width: 200,
       render: (dom, record) => {
         return <>{handleLabelToString(record?.label)}</>;
       },
@@ -171,18 +181,23 @@ const Question: React.FC = () => {
     {
       title: <FormattedMessage id="pages.questionTable.views" defaultMessage="views" />,
       dataIndex: 'views',
+      width: 100,
       hideInSearch: true,
       hideInDescriptions: true,
+      sorter: true,
     },
     {
       title: <FormattedMessage id="pages.questionTable.likeCount" defaultMessage="likeCount" />,
       dataIndex: 'likeCount',
+      width: 100,
       hideInSearch: true,
       hideInDescriptions: true,
+      sorter: true,
     },
     {
       title: <FormattedMessage id="pages.questionTable.checkStatus" defaultMessage="checkStatus" />,
       dataIndex: 'optStatus',
+      width: 100,
       initialValue: 0,
       hideInSearch: true,
       hideInDescriptions: true,
@@ -194,15 +209,17 @@ const Question: React.FC = () => {
     {
       title: <FormattedMessage id="pages.questionTable.owner" defaultMessage="owner" />,
       dataIndex: 'updator',
+      width: 100,
       hideInSearch: true,
       hideInDescriptions: true,
       render: (dom, record) => {
-        return <>{record?.updator} </>;
+        return <>{record?.updator ? record?.updator : '-'} </>;
       },
     },
     {
       title: <FormattedMessage id="pages.questionTable.updatedAt" defaultMessage="updatedAt" />,
       dataIndex: 'updatedAt',
+      width: 150,
       hideInSearch: true,
       hideInDescriptions: true,
     },
@@ -211,13 +228,18 @@ const Question: React.FC = () => {
       dataIndex: 'options',
       hideInSearch: true,
       hideInDescriptions: true,
+      width: 200,
+      fixed: 'right',
       render: (_, record) => (
         <>
           <a
             onClick={async () => {
               // handleUpdateModalVisible(true);
               const { data } = await pushQuestion({ id: record?.id });
-              data && data.id && message.success('推送成功');
+              if (data?.id) {
+                message.success('推送成功');
+                actionRef.current?.reload();
+              }
             }}
           >
             推送
@@ -236,8 +258,15 @@ const Question: React.FC = () => {
           <a
             onClick={async () => {
               // handleUpdateModalVisible(true);
-              const { data } = await deleteQuestion({ id: record?.id, type: 1 });
-              data && data.id && message.success('删除成功');
+              try {
+                const { data } = await deleteQuestion({ id: record?.id, type: 1 });
+                if (data?.id) {
+                  message.success('删除成功');
+                  actionRef.current?.reload();
+                }
+              } catch (error) {
+                message.error('删除失败');
+              }
             }}
           >
             删除
@@ -255,6 +284,8 @@ const Question: React.FC = () => {
       stem: string;
       label: string;
       optStatus: string;
+      order: string;
+      orderMethod: string;
     },
   ) => {
     const msg = await getOperationQuestionList({
@@ -265,6 +296,8 @@ const Question: React.FC = () => {
       keyword: params.stem,
       label: params.label,
       optStatus: params.optStatus,
+      order: params.order,
+      orderMethod: params.orderMethod,
     });
     const { rows, total, pageTotal } = msg?.data;
     return {
@@ -273,6 +306,21 @@ const Question: React.FC = () => {
       total: total,
       current: pageTotal,
     };
+  };
+
+  const handleTableChange = (pagination, filters, sorter) => {
+    console.log('pagination', pagination);
+    console.log('filters', filters);
+    console.log('sorter', sorter);
+
+    setOrder(sorter.field);
+    setOrderMethod(sorter.order);
+    // this.fetch({
+    //   sortField: sorter.field,
+    //   sortOrder: sorter.order,
+    //   pagination,
+    //   ...filters,
+    // });
   };
 
   return (
@@ -300,7 +348,7 @@ const Question: React.FC = () => {
               width="md"
               colProps={{ xl: 12, md: 12 }}
               name="subject"
-              placeholder="移动web与前端"
+              placeholder="前端与移动开发"
               // valueEnum={{ '220000198603204107': '候' }}
               options={subjectArr}
             />
@@ -326,7 +374,12 @@ const Question: React.FC = () => {
               placeholder="题干关键词搜索"
               enterButton
               size="middle"
-              onSearch={(v) => setStem(v)}
+              onChange={(v) => {
+                setInputValue(v.target.value);
+              }}
+              onSearch={(v) => {
+                setStem(v);
+              }}
               style={{ maxWidth: 522, width: '100%' }}
             />
           </ProForm.Group>
@@ -334,7 +387,8 @@ const Question: React.FC = () => {
       </div>
       <div style={{ background: '#fff', padding: 32, paddingBottom: 0, paddingTop: 0 }}>
         <ProTable<QuestionAPI.QuestionItem, QuestionAPI.PageParams>
-          params={{ subject, stem, label, optStatus }}
+          scroll={{ x: 1300 }}
+          params={{ subject, stem, label, optStatus, order, orderMethod }}
           request={(params) => request({ ...params, searchType: 0 })}
           columns={columns}
           actionRef={actionRef}
@@ -347,10 +401,12 @@ const Question: React.FC = () => {
           }}
           toolBarRender={false}
           search={false}
+          onChange={handleTableChange}
         ></ProTable>
       </div>
 
       <ModalForm
+        className={styles.managerModal}
         title="修改知识点"
         visible={modalVisible}
         onVisibleChange={handleModalVisible}
@@ -359,6 +415,9 @@ const Question: React.FC = () => {
           onCancel: () => console.log('run'),
         }}
         onFinish={async (values) => {
+          if (drawerVisible) {
+            return handleModalVisible(false);
+          }
           console.log('[values]', values.label);
           console.log('[xxxx]', changeLabelTags(values.label));
           const result = await submitEditInfo({
@@ -377,12 +436,15 @@ const Question: React.FC = () => {
           return true;
         }}
       >
-        <ProDescriptions style={{ background: '#F6F7F9', padding: 16 }} column={2}>
+        <ProDescriptions
+          style={{ background: '#F6F7F9', padding: 16, marginBottom: 16 }}
+          column={2}
+        >
           <ProDescriptions.Item span={2} label="题目">
-            {currentRow?.stem}
+            <MarkWidget>{currentRow?.stem}</MarkWidget>
           </ProDescriptions.Item>
           <ProDescriptions.Item span={4} label="答案">
-            {currentRow?.answer}
+            <MarkWidget>{currentRow?.answer}</MarkWidget>
           </ProDescriptions.Item>
           <ProDescriptions.Item label="难度" valueType="rate">
             {currentRow?.difficulty}
@@ -390,8 +452,8 @@ const Question: React.FC = () => {
         </ProDescriptions>
         {drawerVisible && (
           <div className={styles.tagWrapper}>
-            {labelArr.map((i) => (
-              <div className={styles.tag}>{i.label}</div>
+            {currentRow?.label.map((i) => (
+              <div className={styles.tag}>{i.name}</div>
             ))}
           </div>
         )}
