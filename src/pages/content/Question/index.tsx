@@ -65,19 +65,16 @@ const Question: React.FC = () => {
     let result = labelArr.filter((item) => {
       return list.indexOf(item.value) > -1;
     });
-    console.log('[result111]', result);
     let temp = result.map((item) => {
       return {
         id: item.value,
         name: item.label,
       };
     });
-    console.log('[temp111]', temp);
 
     return temp;
   };
   useEffect(() => {
-    console.log('[history]', history.location.query);
     setInputValue(history.location.query?.id);
     setStem(history.location.query?.id);
   }, [history.location.query]);
@@ -146,7 +143,6 @@ const Question: React.FC = () => {
               setCurrentRow(record);
               handleDrawerVisible(true);
               handleModalVisible(true);
-              console.log('打开抽屉Modal', record);
             }}
             style={{ overflow: 'hidden' }}
           >
@@ -315,18 +311,8 @@ const Question: React.FC = () => {
   };
 
   const handleTableChange = (pagination, filters, sorter) => {
-    console.log('pagination', pagination);
-    console.log('filters', filters);
-    console.log('sorter', sorter);
-
     setOrder(sorter.field);
     setOrderMethod(sorter.order);
-    // this.fetch({
-    //   sortField: sorter.field,
-    //   sortOrder: sorter.order,
-    //   pagination,
-    //   ...filters,
-    // });
   };
 
   return (
@@ -345,7 +331,6 @@ const Question: React.FC = () => {
               setSubject(val.subject);
               setLabel(val.label);
               setOptStatus(val.optStatus);
-              console.log('[onValuesChange]', val);
             });
           }}
         >
@@ -400,11 +385,7 @@ const Question: React.FC = () => {
           actionRef={actionRef}
           rowKey="id"
           formRef={ref}
-          onRequestError={(error) => console.log('[请求失败]', error)}
           options={false}
-          onSubmit={(params) => {
-            console.log('[onSubmit]', params);
-          }}
           toolBarRender={false}
           search={false}
           onChange={handleTableChange}
@@ -417,23 +398,15 @@ const Question: React.FC = () => {
         visible={modalVisible}
         onVisibleChange={handleModalVisible}
         autoFocusFirstInput
-        modalProps={{
-          onCancel: () => console.log('run'),
-        }}
         onFinish={async (values) => {
           if (drawerVisible) {
             return handleModalVisible(false);
           }
-          console.log('[values]', values.label);
-          console.log('[xxxx]', changeLabelTags(values.label));
           const result = await submitEditInfo({
             ...currentRow,
             id: currentRow?.id,
             label: changeLabelTags(values.label),
           });
-          // 这里tags需要改为 [{id:xx,name:yyy}]
-          console.log('[model 提交内容]', result);
-          // todo : 细致化体验
           message.success('提交成功');
           handleModalVisible(false);
           if (actionRef.current) {

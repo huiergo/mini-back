@@ -8,10 +8,4 @@ const config = {
   realm: process.env.buildType === 'pro' ? 'itcast' : 'Test',
   clientId: 'teaching-wxoptClient',
 };
-// const config = {
-//   url: 'https://auth-t.itcast.cn/auth',
-//   realm: 'Test',
-//   clientId: 'teach_training',
-// };
-console.log('[config]', config);
 export const instance = new Keycloak(config);

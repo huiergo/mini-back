@@ -87,7 +87,6 @@ const Feedback: React.FC = () => {
       current: params.current,
       pageSize: params.pageSize,
     });
-    console.log('[getFeedback]', msg);
     const { rows, total, pageTotal } = msg?.data;
     return {
       data: rows,

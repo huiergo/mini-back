@@ -28,7 +28,6 @@ export async function getInitialState(): Promise<{
   fetchUserInfo?: () => Promise<API.CurrentUser | undefined>;
 }> {
   instance.init({ 'login-required': true }).then((authenticated: boolean) => {
-    console.log('[authenticated]', authenticated);
     if (authenticated) {
       localStorage.setItem('token', instance.token); // 将token存入本地缓存
       localStorage.setItem('user-config', JSON.stringify(instance.tokenParsed)); // 将用户信息存入本地缓存
@@ -42,8 +41,6 @@ export async function getInitialState(): Promise<{
       return msg && JSON.parse(msg);
     } catch (error) {
       console.log('[error]', error);
-      // history.push(loginPath);
-      // instance.login();
     }
     return undefined;
   };
@@ -71,10 +68,7 @@ export const layout: RunTimeLayoutConfig = ({ initialState, setInitialState }) =
       content: initialState?.currentUser?.name,
     },
     footerRender: () => <Footer />,
-    onPageChange: () => {
-      const { location } = history;
-      console.log('[onPageChange]', location);
-    },
+    onPageChange: () => {},
     menuHeaderRender: undefined,
     // 自定义 403 页面
     // unAccessible: <div>unAccessible</div>,
@@ -124,7 +118,6 @@ const authHeaderInterceptor = (url: string, options: RequestOptionsInit) => {
 };
 
 const unionResponseInterceptors = (response: Response, options: RequestOptionsInit) => {
-  console.log('[demoResponse]', response, options);
   if (response.status == 401) {
     //  todo : auth 入参 refresh_token: undefined
     instance.logout();
